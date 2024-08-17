@@ -23,7 +23,6 @@ function WinScreen() {
             setWinner(playType)
             setWindowSize(window)
         }
-        console.log(grid)
         if (!grid.includes('')) {
             setShow(true)
             setWinner('')

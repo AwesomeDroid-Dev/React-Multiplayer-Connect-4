@@ -18,7 +18,7 @@ function UndoBtn() {
     }
 
   return (
-    <button onClick={handleClick} className="bg-slate-500 m-2 font-semibold float-right text-lg px-2 py-1 rounded-md text-gray-100 hover:bg-slate-400 ml-3">Undo</button>
+    <button onClick={handleClick} className="bg-slate-500 m-2 font-semibold float-right text-lg px-2 py-1 rounded-md text-gray-100 hover:bg-slate-600 ml-3 transition-colors duration-100">Undo</button>
   )
 }
 

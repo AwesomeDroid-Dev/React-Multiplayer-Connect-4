@@ -4,6 +4,7 @@ import Label from '../Utils/Label'
 import { GameContextType } from '../Types/Grid.types';
 import WinScreen from '../Utils/WinScreen';
 import UndoBtn from '../Utils/UndoBtn';
+import LeaveBtn from '../Utils/LeaveBtn';
 
 export const gameContext: React.Context<any> = createContext(null)
 
@@ -16,6 +17,7 @@ function App() {
   const [turn, setTurn] = useState('X')
   const [latestChange, setLatestChange] = useState(-1);
   const [moves, setMoves] = useState([])
+  const [theme, setTheme] = useState('original')
 
   return (
     <>
@@ -28,11 +30,14 @@ function App() {
         latestChange,
         setLatestChange,
         moves,
-        setMoves
+        setMoves,
+        theme,
+        setTheme
       } as GameContextType
     }>
       <div className='flex items-center justify-center h-screen flex-col p-[5vw]'>
         <WinScreen/>
+        <LeaveBtn />
         <div className='w-full h-12 items-center z-10'>
           <Label/>
           <UndoBtn/>

@@ -7,6 +7,8 @@ export interface GameContextType {
   setLatestChange: React.Dispatch<React.SetStateAction<(number)>>;
   moves: any;
   setMoves: any;
+  theme: 'original'|'new';
+  setTheme: React.Dispatch<React.SetStateAction<'original'|'new'>>
 }
 
 export type XO = ('X'|'O'|'')

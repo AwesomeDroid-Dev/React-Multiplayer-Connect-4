@@ -20,7 +20,7 @@ function Grid() {
   }
 
   return (
-      <div className="grid grid-cols-7 w-full gap-[1.5%] md:gap-2 max-w-screen-sm p-2">
+      <div className="grid grid-cols-7 w-full gap-[1.5vw] md:gap-[2vw] max-w-screen-sm p-2">
         {grid.map((_: XO, index: number) => (
           <GridBox key={index} index={index} handleClick={handleClick} text={grid[index]} />
         ))}
