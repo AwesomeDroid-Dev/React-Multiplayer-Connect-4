@@ -8,7 +8,9 @@ export interface GameContextType {
   moves: any;
   setMoves: any;
   theme: 'original'|'new';
-  setTheme: React.Dispatch<React.SetStateAction<'original'|'new'>>
+  setTheme: React.Dispatch<React.SetStateAction<'original'|'new'>>;
+  event: string;
+  setEvent: React.Dispatch<React.SetStateAction<string>>
 }
 
 export type XO = ('X'|'O'|'')

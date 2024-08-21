@@ -1,4 +1,4 @@
-import { createContext, useState } from 'react';
+import { createContext, useEffect, useState } from 'react';
 import Grid from '../Grid/Grid';
 import Label from '../Utils/Label'
 import { GameContextType } from '../Types/Grid.types';
@@ -8,16 +8,31 @@ import LeaveBtn from '../Utils/LeaveBtn';
 
 export const gameContext: React.Context<any> = createContext(null)
 
-
-//Add settting 'Color Mode'
-
-
-function App() {
+function Game({multiplayer, data, myTurn}: any) {
   const [grid, setGrid] = useState(Array.from({ length: 42 }).map(()=>''))
   const [turn, setTurn] = useState('X')
   const [latestChange, setLatestChange] = useState(-1);
   const [moves, setMoves] = useState([])
-  const [theme, setTheme] = useState('original')
+  const [theme, setTheme] = useState('new')
+  const [event, setEvent] = useState('')
+
+  useEffect(() => {
+    if (multiplayer) {
+      data.on('play', (data: any) => {
+        console.log(data)
+        setTurn(data.turn)
+        setGrid(data.grid)
+        setLatestChange(data.latestChange)
+      })
+    }
+  }, [multiplayer, data])
+
+  useEffect(() => {
+    if (multiplayer && latestChange !== -1) {
+      data.emit('play', {latestChange})
+      setEvent('')
+    }
+  }, [event])
 
   return (
     <>
@@ -32,17 +47,19 @@ function App() {
         moves,
         setMoves,
         theme,
-        setTheme
+        setTheme,
+        event,
+        setEvent
       } as GameContextType
     }>
-      <div className='flex items-center justify-center h-screen flex-col p-[5vw]'>
+      <div className='flex items-center justify-center w-screen h-screen flex-col p-[5vw]'>
         <WinScreen/>
         <LeaveBtn />
         <div className='w-full h-12 items-center z-10'>
-          <Label/>
+          <Label myTurn={myTurn} />
           <UndoBtn/>
         </div>
-        <Grid/>
+        <Grid myTurn={myTurn} />
       </div>
 
     </gameContext.Provider>
@@ -50,4 +67,10 @@ function App() {
   );
 }
 
-export default App
+Game.defaultProps = {
+  multiplayer: false,
+  data: null,
+  myTurn: ''
+}
+
+export default Game

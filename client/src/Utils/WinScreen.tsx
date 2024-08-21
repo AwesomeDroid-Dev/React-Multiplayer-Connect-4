@@ -4,7 +4,7 @@ import { GameContextType, XO } from "../Types/Grid.types"
 import Confetti from 'react-confetti'
 
 function WinScreen() {
-    const { setTurn, setMoves, setGrid, grid, latestChange } = useContext(gameContext) as GameContextType
+    const { setTurn, setMoves, setGrid, grid, latestChange, theme } = useContext(gameContext) as GameContextType
     const [windowSize, setWindowSize] = useState(window) as any;
     const [show, setShow] = useState(false)
     const [winner, setWinner] = useState('X')
@@ -93,7 +93,11 @@ function WinScreen() {
         height={windowSize.innerHeight}
         className="absolute -m-1"
         />
-        <p className="-m-10">{winner===''?'Tie!':`${winner} Wins!`}</p><br/>
+        {theme==='original'?
+        <p className="-m-10">{winner===''?'Tie!':`${winner} Wins!`}</p>
+        :
+        <p className="-m-10">{winner===''?'Tie!':`${winner==='X'?'🔴':'🔵'}Wins!`}</p>
+        }<br/>
         <button onClick={handleClick} className="bg-slate-500 p-2 text-xl font-normal text-gray-200 hover:bg-slate-400 rounded-md">Play Again!</button>
         </div>}
     </>

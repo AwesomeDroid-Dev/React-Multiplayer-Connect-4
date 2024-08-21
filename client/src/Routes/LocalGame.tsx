@@ -4,7 +4,7 @@ function LocalGame() {
 
   return (
     <>
-    <Game />
+    <Game multiplayer={false} />
     </>
   );
 }

@@ -2,6 +2,8 @@ import { useState, useEffect, useContext } from 'react';
 import { gameContext } from '../Game/Game';
 import { GameContextType } from '../Types/Grid.types';
 
+// MAKE IT FALL FROM THE POSITION OF THE CLICK OR FROM THE TOP OF THE 
+
 function GridBox(props: { handleClick: (arg0: any) => void; index: number; text: 'X'|'O'|'' }) {
   const {theme} = useContext(gameContext) as GameContextType
   const [animate, setAnimate] = useState(false);
@@ -11,7 +13,7 @@ function GridBox(props: { handleClick: (arg0: any) => void; index: number; text:
     setText(props.text)
     if (props.text) {
       setAnimate(true);
-      const timer = setTimeout(() => setAnimate(false), 500); // Animation duration
+      const timer = setTimeout(() => setAnimate(false), 20); // Animation duration
       return () => clearTimeout(timer);
     }
   }, [props.text]);
@@ -21,17 +23,29 @@ function GridBox(props: { handleClick: (arg0: any) => void; index: number; text:
         onClick={() => props.handleClick(props.index)}
         className={theme==='new'
           ?
-          `relative w-[10vw] h-[10vw] bg-yellow-400 border border-gray-400 rounded-md hover:cursor-pointer flex items-center justify-center`
+          `relative w-full aspect-square bg-yellow-400 border border-gray-400 rounded-md hover:cursor-pointer flex items-center justify-center`
           :
-          `relative w-[10vw] h-[10vw] bg-blue-500 text-3xl font-bold text-white hover:cursor-pointer`
+          `relative w-full aspect-square bg-blue-500 text-3xl font-bold text-white hover:cursor-pointer`
         }
     >
       { theme==='new' ?
-        <div className={`text-4xl flex items-center justify-center translate-y-[-1.9px] font-bold select-none ${animate ? 'animate-fall' : ''}`}>
+        <div 
+        className={`leading-8 pb-[3px] text-4xl absolute inset-0 flex items-center justify-center select-none transition-transform ease-in`}
+        style={{
+          transform: `translateY(${animate ? `${-100 * (Math.floor(props.index / 7) + 0.5)}%` : '0%'})`,
+          transitionDuration: `${animate ? '0s' : `${300+(Math.floor(props.index/7)*50)}ms`}`,
+        }}
+      >
             {text === 'X' ? '🔴' : text === 'O' ? '🔵' : ''}
         </div>
         :
-        <div className={`absolute inset-0 flex items-center select-none translate-y-[-1.9px] justify-center ${animate ? 'animate-fall' : ''}`}>
+        <div 
+        className={'absolute inset-0 flex items-center select-none justify-center transition-transform ease-in'}
+        style={{
+          transform: `translateY(${animate ? `${-100 * (Math.floor(props.index / 7) + 0.5)}%` : '0%'})`,
+          transitionDuration: `${animate ? '0s' : `${300+(Math.floor(props.index/7)*50)}ms`}`,
+        }}
+        >
             {text === 'X' ? '🗙' : text === 'O' ? 'O' : ''}
         </div>
       }
@@ -40,3 +54,4 @@ function GridBox(props: { handleClick: (arg0: any) => void; index: number; text:
 }
 
 export default GridBox;
+

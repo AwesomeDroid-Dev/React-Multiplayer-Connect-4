@@ -11,7 +11,7 @@ function App() {
           <Link to={'tournament-game'} className="bg-slate-500 hover:bg-slate-600 py-2 px-4 rounded-md text-white font-bold transition duration-300">Tournament Game</Link>
         </div>
       </div>
-    x</div>
+    </div>
   )
 }
 export default App

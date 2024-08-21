@@ -1,18 +1,29 @@
-import { Link } from "react-router-dom"
+import CreateGame from "../Game/CreateGame";
+import Game from "../Game/Game"
+import io from "socket.io-client"
+import LeaveBtn from "../Utils/LeaveBtn";
+import { useState } from "react";
+
+const socket = io('http://localhost:5000')
+socket.connect();
+
 
 function MultiplayerGame() {
+  const [createGameMenu, setCreateGameMenu] = useState(true)
+  const [myTurn, setMyTurn]: any = useState('')
+
+  socket.on('start-game', (data: any) => {
+    //players = {X: socket.id 1, O: socket.id 2}
+    setMyTurn(data.players.X === socket.id ? 'X' : 'O')
+    setCreateGameMenu(false)
+  })
+
   return (
-    <div className="flex flex-col items-center justify-center h-screen">
-      <div className="text-3xl font-bold text-gray-800">Coming Soon</div>
-      <div className="mt-4">
-        <Link
-          to="/"
-          className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
-        >
-          Back
-        </Link>
-      </div>
-    </div>
+      <>
+      <LeaveBtn />
+      {createGameMenu && <CreateGame socket={socket} />}
+      {!createGameMenu && <Game multiplayer={true} data={socket} myTurn={myTurn} />}
+      </>
   )
 }
 
