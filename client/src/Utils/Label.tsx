@@ -10,7 +10,9 @@ function Label({myTurn}: any) {
     {
     theme==='original'
     ?
-    <b>{turn==='X'?'🗙':turn==='O'?'O':''}</b>
+    <b>
+      {turn==='X'?'🗙':turn==='O'?'O':''}{myTurn===turn?'/ Your Turn':myTurn===''?'' : "/ Opponent's turn"}
+      </b>
     :
     <b className="leading-8 pb-[3px] text-2xl font-normal">
       {turn === 'X' ? '🔴' : turn === 'O' ? '🔵' : ''}{myTurn===turn?'/ Your Turn':myTurn===''?'' : "/ Opponent's turn"}
