@@ -5,31 +5,50 @@ import { GameContextType } from '../Types/Grid.types';
 import WinScreen from '../Utils/WinScreen';
 import UndoBtn from '../Utils/UndoBtn';
 import LeaveBtn from '../Utils/LeaveBtn';
+import MultiplayerWinScreen from '../Mulitplayer/MultiplayerWinScreen';
 
 export const gameContext: React.Context<any> = createContext(null)
 
-function Game({multiplayer, data, myTurn}: any) {
+function Game({multiplayer, data, myTurn, event, setEvent}: any) {
   const [grid, setGrid] = useState(Array.from({ length: 42 }).map(()=>''))
   const [turn, setTurn] = useState('X')
   const [latestChange, setLatestChange] = useState(-1);
   const [moves, setMoves] = useState([])
   const [theme, setTheme] = useState('new')
-  const [event, setEvent] = useState('')
+  const [winner, setWinner] = useState('none')
 
   useEffect(() => {
     if (multiplayer) {
       data.on('play', (data: any) => {
-        console.log(data)
+        console.log('play')
         setTurn(data.turn)
         setGrid(data.grid)
         setLatestChange(data.latestChange)
+      })
+      data.on('win', (data: any) => {
+        console.log(data)
+        setWinner(data)
+      })
+      data.on('grid', (data: any) => {
+        console.log('grid')
+        setGrid(data)
+      })
+      data.on('turn', (data: any) => {
+        console.log('turn')
+        setTurn(data)
       })
     }
   }, [multiplayer, data])
 
   useEffect(() => {
-    if (multiplayer && latestChange !== -1) {
-      data.emit('play', {latestChange})
+    if (multiplayer) {
+      if (event === 'play') {
+        data.emit('play', {latestChange})
+      } else if (event === 'undo') {
+        //add stuff
+      } else if (event === 'start-game') {
+        setWinner('none')
+      }
       setEvent('')
     }
   }, [event])
@@ -48,12 +67,19 @@ function Game({multiplayer, data, myTurn}: any) {
         setMoves,
         theme,
         setTheme,
+        winner,
+        setWinner,
         event,
-        setEvent
+        setEvent,
       } as GameContextType
     }>
       <div className='flex items-center justify-center w-screen h-screen flex-col p-[5vw]'>
-        <WinScreen/>
+        {winner!=='none' && multiplayer
+        ? 
+        <MultiplayerWinScreen socket={data} />
+        :
+        <WinScreen multiplayer={multiplayer} />
+        }
         <LeaveBtn />
         <div className='w-full h-12 items-center z-10'>
           <Label myTurn={myTurn} />

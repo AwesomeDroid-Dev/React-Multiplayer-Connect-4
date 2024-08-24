@@ -9,6 +9,8 @@ export interface GameContextType {
   setMoves: any;
   theme: 'original'|'new';
   setTheme: React.Dispatch<React.SetStateAction<'original'|'new'>>;
+  winner: XO|'none';
+  setWinner: React.Dispatch<React.SetStateAction<XO|'none'>>;
   event: string;
   setEvent: React.Dispatch<React.SetStateAction<string>>
 }

@@ -3,13 +3,19 @@ import { gameContext } from "../Game/Game"
 import { GameContextType, XO } from "../Types/Grid.types"
 import Confetti from 'react-confetti'
 
-function WinScreen() {
-    const { setTurn, setMoves, setGrid, grid, latestChange, theme } = useContext(gameContext) as GameContextType
+function WinScreen({multiplayer}: any) {
+    const { setTurn, setMoves, setGrid, grid, latestChange, theme, winner, setWinner } = useContext(gameContext) as GameContextType
     const [windowSize, setWindowSize] = useState(window) as any;
     const [show, setShow] = useState(false)
-    const [winner, setWinner] = useState('X')
 
     useEffect(()=>{
+        if (multiplayer) {
+            if (winner!=='none') {
+                setShow(true)
+                setWindowSize(window)
+            }
+            return;
+        }
         let playType: XO = grid[latestChange]
 
         const lat = latestChange
@@ -31,7 +37,7 @@ function WinScreen() {
                 innerWidth: 0,
             })
         }
-    }, [latestChange])
+    }, [latestChange, winner])
 
     function checkWin(board: XO[], index: number, player: XO) {
         const directions = [
