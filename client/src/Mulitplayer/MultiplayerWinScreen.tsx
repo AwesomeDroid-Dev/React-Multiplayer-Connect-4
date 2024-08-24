@@ -2,7 +2,6 @@ import { useContext, useEffect, useState } from "react";
 import Confetti from "react-confetti";
 import { GameContextType } from "../Types/Grid.types";
 import { gameContext } from "../Game/Game";
-import { Link } from "react-router-dom";
 
 function MultiplayerWinScreen({socket}: any) {
     const [windowSize, setWindowSize] = useState(window) as any;
@@ -48,7 +47,7 @@ function MultiplayerWinScreen({socket}: any) {
         :
         <p className="bg-green-700 p-2 text-xl font-normal text-gray-200 rounded-md">Request Sent!</p>
         }
-        <Link to={'/'} className="bg-slate-500 p-2 text-xl font-normal text-gray-200 hover:bg-slate-400 rounded-md">Back To Home</Link>
+        <button onClick={() => window.location.reload()} className="bg-slate-500 p-2 text-xl font-normal text-gray-200 hover:bg-slate-400 rounded-md">Back To Home</button>
         </div>
         </div>
         </>

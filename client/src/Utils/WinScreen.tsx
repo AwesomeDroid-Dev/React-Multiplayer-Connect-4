@@ -85,7 +85,7 @@ function WinScreen({multiplayer}: any) {
 
     function handleClick() {
         setShow(false)
-        setGrid(Array.from({ length: 42 }).map(()=>''))
+        setGrid(Array(42).fill(''))
         setMoves([])
         setTurn('X')
     }

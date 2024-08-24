@@ -10,7 +10,7 @@ import MultiplayerWinScreen from '../Mulitplayer/MultiplayerWinScreen';
 export const gameContext: React.Context<any> = createContext(null)
 
 function Game({multiplayer, data, myTurn, event, setEvent}: any) {
-  const [grid, setGrid] = useState(Array.from({ length: 42 }).map(()=>''))
+  const [grid, setGrid] = useState(Array(42).fill(''))
   const [turn, setTurn] = useState('X')
   const [latestChange, setLatestChange] = useState(-1);
   const [moves, setMoves] = useState([])
@@ -96,7 +96,9 @@ function Game({multiplayer, data, myTurn, event, setEvent}: any) {
 Game.defaultProps = {
   multiplayer: false,
   data: null,
-  myTurn: ''
+  myTurn: '',
+  event: '',
+  setEvent: () => {},
 }
 
 export default Game

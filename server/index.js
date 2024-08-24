@@ -16,7 +16,7 @@ const io = new Server(server, {
 })
 
 let games = {}
-games['eo3m0j'] = {turn: 'X', game: Array.from({ length: 42 }).map(()=>''), players: {X: null, O: null}}
+games['eo3m0j'] = {turn: 'X', game: Array(42).fill(''), players: {X: null, O: null}}
 
 io.on('connection', (socket) => {
     console.log(`User connected: ${socket.id}`)
@@ -38,7 +38,7 @@ io.on('connection', (socket) => {
 
     socket.on('create-game', (data) => {
         gameCode = genCode();
-        games[gameCode] = {turn: 'X', game: Array.from({ length: 42 }).map(()=>''), players: {X: socket.id, O: null}};
+        games[gameCode] = {turn: 'X', game: Array(42).fill(''), players: {X: socket.id, O: null}};
         socket.emit('create-game', gameCode);
         socket.join(gameCode)
     });
@@ -78,7 +78,7 @@ io.on('connection', (socket) => {
         io.to(gameCode).emit('rematch', newCode)
         gameCode = newCode
         socket.join(gameCode)
-        games[gameCode] = {turn: 'X', game: Array.from({ length: 42 }).map(()=>''), players: oldGame.players};
+        games[gameCode] = {turn: 'X', game: Array(42).fill(''), players: oldGame.players};
     })
 
     socket.on('accept-rematch', (data) => {
