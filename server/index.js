@@ -16,29 +16,55 @@ const io = new Server(server, {
 })
 
 let games = {}
-games['eo3m0j'] = {turn: 'X', game: Array(42).fill(''), players: {X: null, O: null}}
+let users = {}
 
 io.on('connection', (socket) => {
     console.log(`User connected: ${socket.id}`)
 
+    let gameCode = '' //Example
+    let myTurn = 'X'        //Example
+    let username = ''
+
     socket.on('disconnect', () => {
         console.log(`User disconnected: ${socket.id}`)
+
+        username = Object.keys(users).find(key => users[key] === socket.id)
+        if (username) delete users[username]
+
+        if (games[gameCode]) {
+            if (games[gameCode].players.X === socket.id) {
+                games[gameCode].players.X = null
+            } else if (games[gameCode].players.O === socket.id) {
+                games[gameCode].players.O = null
+            }
+        }
+        
     })
 
-    if (games['eo3m0j'].players.X === null) {
-        games['eo3m0j'].players.X = socket.id
-    } else {    
-        games['eo3m0j'].players.O = socket.id
-    }
-    socket.emit('grid', games['eo3m0j'].game)
-    socket.emit('turn', games['eo3m0j'].turn)
+    socket.on('login', (data) => {
+        if (typeof users[data.username] !== 'undefined') {
+            socket.emit('login', {status: 'error', message: 'Username already taken'});
+        };
+        if (users[data.username] === undefined) users[data.username] = socket.id
+        socket.emit('login', {status: 'success'});
+        username = data.username
+        console.log(users)
+    })
 
-    let gameCode = 'eo3m0j'
-    let myTurn = 'X'
+    socket.on('invite', (data) => {
+        console.log(data)
+        if (typeof games[data.gameCode] === 'undefined') return;
+        const receiverId = users[data.username]
+        if (receiverId) {
+            io.to(receiverId).emit('invite', {sender: username, gameCode: data.gameCode});
+        }
+    });
 
     socket.on('create-game', (data) => {
         gameCode = genCode();
-        games[gameCode] = {turn: 'X', game: Array(42).fill(''), players: {X: socket.id, O: null}};
+        games[gameCode] = {winner: 'none', turn: 'X', game: Array(42).fill(''), players: {X: (data.begin === 'X' ? socket.id : null), O: (data.begin === 'O' ? socket.id : null)}, turnSwitching: data.turnSwitching, begin: 'X'};
+        games[gameCode].begin = games[gameCode].turn
+        myTurn = data.begin
         socket.emit('create-game', gameCode);
         socket.join(gameCode)
     });
@@ -57,9 +83,9 @@ io.on('connection', (socket) => {
             myTurn = 'X'
         }
         socket.join(gameCode)
+        io.to(gameCode).emit('start-game', {gameCode, players: games[gameCode].players})
         io.to(gameCode).emit('grid', games[gameCode].game)
         io.to(gameCode).emit('turn', games[gameCode].turn)
-        io.to(gameCode).emit('start-game', {gameCode, players: games[gameCode].players})
     });
 
     socket.on('play', (data) => {
@@ -68,18 +94,19 @@ io.on('connection', (socket) => {
         const win = checkWin(games[gameCode].game, data.latestChange, myTurn)
         if (win) {
             io.to(gameCode).emit('win', myTurn)
+            games[gameCode].winner = myTurn
         }
         io.to(gameCode).emit('play', {grid: games[gameCode].game, turn: games[gameCode].turn, latestChange: data.latestChange})
     })
 
     socket.on('request-rematch', () => {
-        const newCode = genCode();
-        const oldGame = games[gameCode]
-        io.to(gameCode).emit('rematch', newCode)
-        gameCode = newCode
+        io.to(gameCode).emit('rematch', gameCode)
         socket.join(gameCode)
-        games[gameCode] = {turn: 'X', game: Array(42).fill(''), players: oldGame.players};
-    })
+        currentGame = games[gameCode]
+        games[gameCode] = {winner: 'none', turn: turnSystem(), game: Array(42).fill(''), players: currentGame.players, turnSwitching: currentGame.turnSwitching, begin: 'X'
+        }
+        games[gameCode].begin = games[gameCode].turn
+    });
 
     socket.on('accept-rematch', (data) => {
         if (typeof games[data.gameCode] === 'undefined') return;
@@ -92,15 +119,59 @@ io.on('connection', (socket) => {
             myTurn = 'O'
         }
         socket.join(gameCode)
+        io.to(gameCode).emit('start-game', {gameCode, players: games[gameCode].players})
         io.to(gameCode).emit('grid', games[gameCode].game)
         io.to(gameCode).emit('turn', games[gameCode].turn)
-        io.to(gameCode).emit('start-game', {gameCode, players: games[gameCode].players})
     })
 })
 
 server.listen(5000, () => {
     console.log('Server is running')
 })
+
+
+class Game {
+    constructor(turnSwitching, begin) {
+        this.winner = 'none'
+        this.turn = 'X'
+        this.game = Array(42).fill('')
+        this.players = {X: null, O: null}
+        this.turnSwitching = turnSwitching
+        this.begin = begin
+    }
+
+    nextTurn() {
+        switch (currentGame.turnSwitching) {
+            case 'switch':
+                return (currentGame.begin === 'X' ? 'O' : 'X')
+            case 'keep':
+                return currentGame.begin
+            case 'winner':
+                return currentGame.winner
+            case 'loser':
+                return (currentGame.winner === 'X' ? 'O' : 'X')
+            default:
+                return currentGame.turn
+        }
+    }
+
+
+}
+
+function turnSystem() {
+    switch (currentGame.turnSwitching) {
+        case 'switch':
+            return (currentGame.begin === 'X' ? 'O' : 'X')
+        case 'keep':
+            return currentGame.begin
+        case 'winner':
+            return currentGame.winner
+        case 'loser':
+            return (currentGame.winner === 'X' ? 'O' : 'X')
+        default:
+            return currentGame.turn
+    }
+}
 
 function checkWin(board, index, player) {
     const directions = [

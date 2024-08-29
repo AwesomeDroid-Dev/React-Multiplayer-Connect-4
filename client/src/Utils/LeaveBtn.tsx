@@ -15,16 +15,16 @@ function LeaveBtn() {
         <div 
         className={`flex flex-col absolute h-screen w-screen z-50 items-center justify-center transition-opacity duration-200 bg-black`} 
         style={{
-            opacity: `${opacity ? '70' : '0'}`
+            opacity: `${opacity ? '70%' : '0'}`
         }}
         />
         <div 
         className={`flex flex-col absolute h-screen w-screen z-50 items-center justify-center transition-opacity duration-200`}
         style={{
-            opacity: `${opacity ? '100' : '0'}`
+            opacity: `${opacity ? '100%' : '0'}`
         }}
         >
-            <div className="h-[30%] w-[90%] md:w-[500px] p-10 flex flex-col items-center justify-center bg-slate-100 rounded-md">
+            <div className="w-[90%] md:w-[500px] p-10 flex flex-col items-center justify-center bg-slate-100 rounded-md">
                 <div className="text-3xl font-bold text-gray-900">Are you sure you want to leave the game?</div>
                 <div className="mt-4">
                     <button className="px-4 py-2 mx-1 text-gray-50 bg-red-600 rounded-lg hover:bg-red-700 transition-colors duration-200" onClick={() => window.location.href = '/'}>Leave</button>

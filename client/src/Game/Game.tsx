@@ -9,9 +9,9 @@ import MultiplayerWinScreen from '../Mulitplayer/MultiplayerWinScreen';
 
 export const gameContext: React.Context<any> = createContext(null)
 
-function Game({multiplayer, data, myTurn, event, setEvent}: any) {
-  const [grid, setGrid] = useState(Array(42).fill(''))
-  const [turn, setTurn] = useState('X')
+function Game({multiplayer, data, myTurn, event, setEvent, defTurn, defGrid}: any) {
+  const [grid, setGrid] = useState(defGrid)
+  const [turn, setTurn] = useState(defTurn)
   const [latestChange, setLatestChange] = useState(-1);
   const [moves, setMoves] = useState([])
   const [theme, setTheme] = useState('new')
@@ -34,11 +34,18 @@ function Game({multiplayer, data, myTurn, event, setEvent}: any) {
         setGrid(data)
       })
       data.on('turn', (data: any) => {
-        console.log('turn')
+        console.log('turn: ' + data)
         setTurn(data)
       })
     }
   }, [multiplayer, data])
+
+  useEffect(() => {
+    if (multiplayer) {
+      setGrid(defGrid)
+      setTurn(defTurn)
+    }
+  }, [defGrid, defTurn])
 
   useEffect(() => {
     if (multiplayer) {
@@ -48,6 +55,8 @@ function Game({multiplayer, data, myTurn, event, setEvent}: any) {
         //add stuff
       } else if (event === 'start-game') {
         setWinner('none')
+        setGrid(defGrid)
+        setTurn(defTurn)
       }
       setEvent('')
     }
@@ -99,6 +108,8 @@ Game.defaultProps = {
   myTurn: '',
   event: '',
   setEvent: () => {},
+  defTurn: 'X',
+  defGrid: Array(42).fill(''),
 }
 
 export default Game
