@@ -31,14 +31,7 @@ io.on('connection', (socket) => {
         username = Object.keys(users).find(key => users[key] === socket.id)
         if (username) delete users[username]
 
-        if (games[gameCode]) {
-            if (games[gameCode].players.X === socket.id) {
-                games[gameCode].players.X = null
-            } else if (games[gameCode].players.O === socket.id) {
-                games[gameCode].players.O = null
-            }
-        }
-        
+        handleDisconnect(socket.id, gameCode)
     })
 
     socket.on('login', (data) => {
@@ -46,13 +39,11 @@ io.on('connection', (socket) => {
             socket.emit('login', {status: 'error', message: 'Username already taken'});
         };
         if (users[data.username] === undefined) users[data.username] = socket.id
-        socket.emit('login', {status: 'success'});
         username = data.username
-        console.log(users)
+        socket.emit('login', {status: 'success'});
     })
 
     socket.on('invite', (data) => {
-        console.log(data)
         if (typeof games[data.gameCode] === 'undefined') return;
         const receiverId = users[data.username]
         if (receiverId) {
@@ -61,8 +52,9 @@ io.on('connection', (socket) => {
     });
 
     socket.on('create-game', (data) => {
+        handleDisconnect(socket.id, gameCode)
         gameCode = genCode();
-        games[gameCode] = {winner: 'none', turn: 'X', game: Array(42).fill(''), players: {X: (data.begin === 'X' ? socket.id : null), O: (data.begin === 'O' ? socket.id : null)}, turnSwitching: data.turnSwitching, begin: 'X'};
+        games[gameCode] = {winner: 'none', turn: 'X', game: Array(42).fill(''), players: {X: (data.begin === 'X' ? username : null), O: (data.begin === 'O' ? username : null)}, turnSwitching: data.turnSwitching, begin: 'X'};
         games[gameCode].begin = games[gameCode].turn
         myTurn = data.begin
         socket.emit('create-game', gameCode);
@@ -72,18 +64,22 @@ io.on('connection', (socket) => {
     socket.on('join-game', (data) => {
         if (typeof games[data.gameCode] === 'undefined') return;
         gameCode = data.gameCode
+        if (games[gameCode].players.X === null && games[gameCode].players.O === null) {
+            socket.emit('join-game', {status: 'error', message: "Game doesn't exist"});
+            return
+        }
         if (games[gameCode].players.X === null) {
-            games[gameCode].players.X = socket.id
+            games[gameCode].players.X = username
             myTurn = 'X'
         } else if (games[gameCode].players.O === null) {
-            games[gameCode].players.O = socket.id
+            games[gameCode].players.O = username
             myTurn = 'O'
         } else {
-            games[gameCode].players.X = socket.id
-            myTurn = 'X'
+            socket.emit('join-game', {status: 'error', message: "Game is already full"})
         }
         socket.join(gameCode)
-        io.to(gameCode).emit('start-game', {gameCode, players: games[gameCode].players})
+        socket.emit('join-game', {status: 'success', ...games[gameCode].players})
+        io.to(gameCode).emit('start-game', {gameCode, players: {X: users[games[gameCode].players.X], O: users[games[gameCode].players.O]}})
         io.to(gameCode).emit('grid', games[gameCode].game)
         io.to(gameCode).emit('turn', games[gameCode].turn)
     });
@@ -95,6 +91,9 @@ io.on('connection', (socket) => {
         if (win) {
             io.to(gameCode).emit('win', myTurn)
             games[gameCode].winner = myTurn
+        } else if (!games[gameCode].game.includes('')) {
+            io.to(gameCode).emit('win', '')
+            games[gameCode].winner = games[gameCode].begin==='X'?'O':'X'
         }
         io.to(gameCode).emit('play', {grid: games[gameCode].game, turn: games[gameCode].turn, latestChange: data.latestChange})
     })
@@ -112,14 +111,14 @@ io.on('connection', (socket) => {
         if (typeof games[data.gameCode] === 'undefined') return;
         gameCode = data.gameCode
         if (games[gameCode].players.X === null) {
-            games[gameCode].players.X = socket.id
+            games[gameCode].players.X = username
             myTurn = 'X'
         } else if (games[gameCode].players.O === null) {
-            games[gameCode].players.O = socket.id
+            games[gameCode].players.O = username
             myTurn = 'O'
         }
         socket.join(gameCode)
-        io.to(gameCode).emit('start-game', {gameCode, players: games[gameCode].players})
+        io.to(gameCode).emit('start-game', {gameCode, players: {X: users[games[gameCode].players.X], O: users[games[gameCode].players.O]}})
         io.to(gameCode).emit('grid', games[gameCode].game)
         io.to(gameCode).emit('turn', games[gameCode].turn)
     })
@@ -128,35 +127,6 @@ io.on('connection', (socket) => {
 server.listen(5000, () => {
     console.log('Server is running')
 })
-
-
-class Game {
-    constructor(turnSwitching, begin) {
-        this.winner = 'none'
-        this.turn = 'X'
-        this.game = Array(42).fill('')
-        this.players = {X: null, O: null}
-        this.turnSwitching = turnSwitching
-        this.begin = begin
-    }
-
-    nextTurn() {
-        switch (currentGame.turnSwitching) {
-            case 'switch':
-                return (currentGame.begin === 'X' ? 'O' : 'X')
-            case 'keep':
-                return currentGame.begin
-            case 'winner':
-                return currentGame.winner
-            case 'loser':
-                return (currentGame.winner === 'X' ? 'O' : 'X')
-            default:
-                return currentGame.turn
-        }
-    }
-
-
-}
 
 function turnSystem() {
     switch (currentGame.turnSwitching) {
@@ -219,4 +189,14 @@ function checkWin(board, index, player) {
 
 function genCode() {
     return Array(6).fill('').map(v => (Math.floor(Math.random() * 36)).toString(36)).join('');
+}
+
+function handleDisconnect(socketId, gameCode) {
+    if (games[gameCode]) {
+        if (users[games[gameCode].players.X] === socketId) {
+            games[gameCode].players.X = null
+        } else if (users[games[gameCode].players.O] === socketId) {
+            games[gameCode].players.O = null
+        }
+    }
 }

@@ -106,7 +106,7 @@ function CreateGame({socket}: any) {
                         </button>
                         <div className="flex flex-row space-x-2">
                         <input value={textInputCode} onChange={(e) => setTextInputCode(e.target.value)} type="text" className="bg-slate-700 hover:bg-slate-900 text-white font-bold py-2 px-4 rounded w-3/4" placeholder="Enter Game ID"/>
-                        <button onClick={handleJoinGame} className="bg-slate-700 hover:bg-slate-900 text-white font-bold py-2 px-4 rounded w-1/4">
+                        <button onClick={() => handleJoinGame(undefined)} className="bg-slate-700 hover:bg-slate-900 text-white font-bold py-2 px-4 rounded w-1/4">
                             Join
                         </button>
                         </div>

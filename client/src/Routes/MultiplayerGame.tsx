@@ -40,6 +40,14 @@ function MultiplayerGame() {
     }
   }, [])
 
+
+  socket.on('login', (data: any) => {
+    if (data.status === 'success') {
+        localStorage.setItem('username', username?username:'')
+        localStorage.setItem('loggedIn', `true`)
+    }
+})
+
   return (
     <>
     {

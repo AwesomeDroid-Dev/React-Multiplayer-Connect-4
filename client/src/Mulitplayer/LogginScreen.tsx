@@ -6,19 +6,10 @@ function LogginScreen({socket, setUsername}: any) {
     const join = () => {
         console.log(id)
         socket.emit('login', {username: id})
+        setUsername(id)
         localStorage.setItem('username', id)
         localStorage.setItem('loggedIn', `true`)
     }
-
-    socket.on('login', (data: any) => {
-        if (data.status === 'success') {
-            localStorage.setItem('username', id)
-            setUsername(id)
-            localStorage.setItem('loggedIn', `true`)
-        } else {
-            alert(data.message)
-        }
-    })
 
     return (
         <>
