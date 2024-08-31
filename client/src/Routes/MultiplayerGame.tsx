@@ -5,7 +5,7 @@ import LeaveBtn from "../Utils/LeaveBtn";
 import { useEffect, useState } from "react";
 import LogginScreen from "../Mulitplayer/LogginScreen";
 
-const socket = io('http://localhost:5000')
+const socket = io('http://localhost:5009')
 socket.connect();
 
 
