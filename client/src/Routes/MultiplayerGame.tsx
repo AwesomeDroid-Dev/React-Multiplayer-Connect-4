@@ -50,10 +50,10 @@ function MultiplayerGame() {
 
   return (
     <>
+    <LeaveBtn />
     {
     username ? 
     <>
-    <LeaveBtn />
     {createGameMenu && <CreateGame socket={socket} />}
     {!createGameMenu && <Game defTurn={beginData.turn} defGrid={beginData.game} multiplayer={true} data={socket} myTurn={myTurn} event={event} setEvent={setEvent} /> }
     </>

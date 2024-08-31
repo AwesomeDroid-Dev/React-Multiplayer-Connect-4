@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { Button, Input, Select } from "antd";
+import {CopyToClipboard} from 'react-copy-to-clipboard';
 
 function CreateGame({socket}: any) {
     const [createGameCode, setCreateGameCode] = useState('Loading...')
@@ -9,6 +11,7 @@ function CreateGame({socket}: any) {
     const [showInviteInput, setShowInviteInput] = useState(false)
     const [currentMenu, setCurrentMenu] = useState('default')
     const [invites, setInvites] = useState([]) as any
+    const [copied, setCopied] = useState(false)
 
     function handleCreateGame() {
         setCurrentMenu('createGame')
@@ -38,103 +41,121 @@ function CreateGame({socket}: any) {
     })
 
     return (
-        <div>
-            {
-            currentMenu === 'createGame'
-            ?
-            <>
-            <div className="absolute top-0 left-0 w-screen h-screen bg-black opacity-70"></div>
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70vw] md:w-[40vw] text-5xl text-white bg-slate-500 rounded-md p-4 flex flex-col gap-4">
-                <p className="text-center">{createGameCode.toLocaleUpperCase()}</p>
-                <div className="flex flex-row gap-2 w-full">
-                    <button onClick={() => navigator.clipboard.writeText(createGameCode)} className="bg-slate-700 hover:bg-slate-900 w-2/3 text-lg text-white font-bold py-2 px-4 rounded">Copy</button>
-                    <button onClick={() => setShowInviteInput(!showInviteInput)} className="bg-slate-700 hover:bg-slate-900 text-lg text-white font-bold w-2/3 py-2 px-4 rounded">Invite</button>
-                    <button onClick={() => setCurrentMenu('default')} className="bg-slate-700 hover:bg-slate-900 text-lg text-white font-bold py-2 px-4 rounded">Close</button>
-                </div>
-                {
-                showInviteInput
-                &&
-                <div className="w-full flex flex-row gap-2">
-                    <input 
-                        type="text" 
-                        value={inviteInput} 
-                        onChange={(e) => setInviteInput(e.target.value)}
-                        className="w-full p-2 text-white text-lg rounded-md bg-slate-700 hover:bg-slate-900" 
-                        placeholder="Enter username to invite" 
-                    />
-                    <button onClick={handleInvite} className="w- bg-slate-700 hover:bg-slate-900 text-lg text-white font-bold py-2 px-4 rounded">Invite</button>
-                </div>
-                }
+<div className="flex justify-center items-center w-screen h-screen bg-gray-800">
+    <div className="absolute inset-0 bg-opacity-70 bg-gray-900 z-0"></div>
+    {
+    currentMenu === 'createGame' &&
+    <div className="relative z-10 flex flex-col items-center bg-gray-700 p-8 pb-4 rounded-lg shadow-lg transition-all">
+        <p className="text-4xl font-semibold text-white mb-6">{createGameCode.toLocaleUpperCase()}</p>
+        <div className="flex space-x-4 mb-4">
+            <CopyToClipboard text={createGameCode} onCopy={() => {
+                setCopied(true); 
+                setTimeout(() => setCopied(false), 2000);
+            }}>
+                <Button className="px-6 py-2 text-lg text-white bg-blue-500 hover:bg-blue-600 rounded-lg">
+                    {copied ? 'Copied!' : 'Copy'}
+                </Button>
+            </CopyToClipboard>
+            <Button onClick={() => setShowInviteInput(!showInviteInput)} className="px-6 py-2 text-lg text-white bg-green-500 hover:bg-green-600 rounded-lg">
+                Invite
+            </Button>
+            <Button onClick={() => setCurrentMenu('default')} className="px-6 py-2 text-lg text-white bg-red-500 hover:bg-red-600 rounded-lg">
+                Close
+            </Button>
+        </div>
+        {showInviteInput && (
+            <div className="w-full flex space-x-4 h-[3rem]">
+                <Input 
+                    value={inviteInput} 
+                    onChange={(e) => setInviteInput(e.target.value)}
+                    className="flex-1 h-full p-3 text-lg rounded-lg bg-gray-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                    placeholder="Enter username to invite" 
+                />
+                <Button onClick={handleInvite} className="h-full text-lg text-white bg-blue-500">
+                    Invite
+                </Button>
             </div>
-            </>
-            :
-            currentMenu === 'settingMenu'
-            ?
-            <>
-            <div className="absolute top-0 left-0 w-screen h-screen bg-black opacity-70"></div>
-            <div className="flex flex-col absolute h-screen w-screen z-50 items-center justify-center">
-                <div className="text-white bg-slate-500 rounded-md px-[20vh] pt-[4vh] pb-[4vh] flex flex-col gap-4">
-                    <p className="text-center text-3xl font-bold">Game Options</p>
-                    <span className="text-center text-2xl">Your turn:</span>
-                    <select value={beginTurn} onChange={(e) => setBeginTurn(e.target.value)} className="bg-slate-700 hover:bg-slate-900 text-lg text-white font-bold py-2 px-4 rounded">
-                        <option value="X">X</option>
-                        <option value="O">O</option>
-                    </select>
-                    <p className="text-center text-2xl">Turn Between Games:</p>
-                    <select value={betweenGame} onChange={(e) => setBetweenGame(e.target.value)} className="bg-slate-700 hover:bg-slate-900 text-lg text-white font-bold py-2 px-4 rounded">
-                        <option value="keep">Keep Turns</option>
-                        <option value="switch">Switch Turns</option>
-                        <option value="winner">Winner Begins</option>
-                        <option value="loser">Loser Begins</option>
-                    </select>
-                    <div className="flex flex-row gap-2">
-                        <button onClick={handleCreateGame} className="bg-slate-700 hover:bg-slate-900 text-lg text-white font-bold py-2 px-4 rounded">Create</button>
-                        <button onClick={() => setCurrentMenu('default')} className="bg-slate-700 hover:bg-slate-900 text-lg text-white font-bold py-2 px-4 rounded">Close</button>
-                    </div>
-            </div>
-            </div>
-            </>
-            :
-            currentMenu === 'default'
-            ?
-            <div className="flex justify-center items-center h-screen w-screen">
-                <div className="bg-slate-500 text-white rounded-md p-4">
-                    <h1 className="text-3xl font-bold mb-4">Create Game</h1>
-                    <div className="flex flex-col space-y-2">
-                        <button onClick={() => setCurrentMenu('settingMenu')} className="bg-slate-700 hover:bg-slate-900 text-white font-bold py-2 px-4 rounded">
-                            Create Game
-                        </button>
-                        <div className="flex flex-row space-x-2">
-                        <input value={textInputCode} onChange={(e) => setTextInputCode(e.target.value)} type="text" className="bg-slate-700 hover:bg-slate-900 text-white font-bold py-2 px-4 rounded w-3/4" placeholder="Enter Game ID"/>
-                        <button onClick={() => handleJoinGame(undefined)} className="bg-slate-700 hover:bg-slate-900 text-white font-bold py-2 px-4 rounded w-1/4">
+        )}
+    </div>
+    }
+    {
+    currentMenu === 'settingMenu' &&
+    <div className="relative z-10 bg-gray-700 p-8 rounded-lg shadow-lg flex flex-col items-center">
+        <p className="text-3xl font-bold text-white mb-6">Game Options</p>
+        <div className="mb-4 w-full">
+            <label className="block text-lg text-white mb-2">Your Turn:</label>
+            <Select className="w-full" 
+                defaultValue={beginTurn} 
+                onChange={(e: any) => setBeginTurn(e.value)} 
+                options={[
+                    {value: 'X', label: 'X'},
+                    {value: 'O', label: 'O'},
+                ]}
+            />
+        </div>
+        <div className="mb-4 w-full">
+            <label className="block text-lg text-white mb-2">Turn Between Games:</label>
+            <Select className="w-full" 
+                defaultValue={betweenGame} 
+                onChange={(e: any) => setBetweenGame(e.value)} 
+                options={[
+                    {value: 'keep', label: 'Keep Turns'},
+                    {value: 'switch', label: 'Switch Turns'},
+                    {value: 'winner', label: 'Winner Begins'},
+                    {value: 'loser', label: 'Loser Begins'},
+                ]}
+            />
+        </div>
+        <div className="flex space-x-4">
+            <Button onClick={handleCreateGame} className="px-6 py-3 text-lg bg-blue-500">
+                Create
+            </Button>
+            <Button onClick={() => setCurrentMenu('default')} className="px-6 py-3 text-lg bg-red-500">
+                Close
+            </Button>
+        </div>
+    </div>
+    }
+    {
+    currentMenu === 'default' &&
+    <div className="relative z-10 bg-gray-700 p-8 rounded-lg shadow-lg flex flex-col items-center">
+        <h1 className="text-3xl font-bold text-white mb-6">Create or Join a Game</h1>
+        <Button onClick={() => setCurrentMenu('settingMenu')} className="w-full h-full mb-4 text-lg text-white bg-blue-500">
+            Create Game
+        </Button>
+        <div className="flex space-x-4 w-full mb-4 h-[2.5rem]">
+            <Input value={textInputCode} onChange={(e) => setTextInputCode(e.target.value)} 
+                type="text" 
+                className="flex-1 p-3 text-lg rounded-lg bg-gray-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                placeholder="Enter Game ID"
+            />
+            <Button onClick={() => handleJoinGame(undefined)} className="h-full w-1/4 text-lg bg-green-500">
+                Join
+            </Button>
+        </div>
+        <h1 className="text-2xl font-bold text-white mb-4">Invitations for {localStorage.getItem('username')}</h1>
+        <div className="w-full max-h-[20vh] overflow-auto space-y-2">
+            {invites.length === 0 
+                ? <p className="text-white">No invitations</p> 
+                : invites.map(({sender, gameCode}: any, i: number) => (
+                    <div key={i} className="flex space-x-4 p-2 bg-gray-600 rounded-lg items-center">
+                        <p className="flex-1 text-white truncate">{sender} sent an invitation!</p>
+                        <Button onClick={() => handleJoinGame(gameCode)} className="px-4 py-2 text-white bg-blue-500 hover:bg-blue-600 rounded-lg">
                             Join
-                        </button>
-                        </div>
+                        </Button>
                     </div>
-                    <h1 className="text-3xl font-bold mt-4">Invitations for {localStorage.getItem('username')}</h1>
-                    <hr/>
-                    <div className="flex flex-col space-y-2 max-h-[20vh] overflow-auto">
-                        {
-                            invites.length === 0
-                            ?
-                            <p>No invitations</p>
-                            :
-                            null
-                        }
-                        {
-                            invites.map(({sender, gameCode}: any, i: number) => 
-                            <div key={i} className="flex flex-row space-x-1 p-1 pb-0">
-                                <p className="w-2/3 bg-slate-700 p-2 rounded">Invitation from {sender}</p>
-                                <button onClick={() => handleJoinGame(gameCode)} className="bg-slate-700 hover:bg-slate-900 text-white font-bold py-2 px-4 rounded w-1/3">Join</button>
-                            </div>
-                            )}
-                    </div>
-                </div>
-            </div>
-            :
-            <div>Something went wrong</div>
+                ))
             }
         </div>
+    </div>
+    }
+    {
+    currentMenu !== 'createGame' && currentMenu !== 'settingMenu' && currentMenu !== 'default' &&
+    <div className="relative z-10 bg-gray-700 p-8 rounded-lg shadow-lg flex flex-col items-center">
+        <p className="text-white text-lg">Something went wrong</p>
+    </div>
+    }
+</div>
     );
 }
 
