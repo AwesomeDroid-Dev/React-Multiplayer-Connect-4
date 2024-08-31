@@ -8,6 +8,7 @@ module.exports = {
     './src/**/*.{ts,tsx}',
   ],
   prefix: "",
+  important: true, 
   theme: {
     container: {
       center: true,
@@ -18,6 +19,21 @@ module.exports = {
     },
     extend: {
       colors: {
+        blue: {
+          500: "#3b82f6", // Base color
+          600: "#2563eb", // Hover color
+          700: "#1d4ed8", // Darker shade
+        },
+        green: {
+          500: "#10b981", // Base color
+          600: "#059669", // Hover color
+          700: "#047857", // Darker shade
+        },
+        red: {
+          500: "#ef4444", // Base color
+          600: "#dc2626", // Hover color
+          700: "#b91c1c", // Darker shade
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

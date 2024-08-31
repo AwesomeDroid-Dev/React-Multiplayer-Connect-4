@@ -1,77 +1,55 @@
 import { Button } from "antd";
 import { Link } from "react-router-dom";
+import { TrophyOutlined, UserOutlined, GlobalOutlined } from '@ant-design/icons';
 
 function App() {
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-800 via-gray-600 to-gray-900">
-      <div className="bg-white w-[80vw] max-w-md p-8 rounded-lg shadow-lg">
-        <h1 className="text-5xl font-extrabold text-center text-gray-800 mb-8">Connect 4</h1>
-        <div className="flex flex-col space-y-3">
-          <Link to={'local-game'}>
-            <Button
-              type="primary"
-              block
-              size="large"
-              style={{
-                backgroundColor: "#1d4ed8",
-                borderColor: "#1d4ed8",
-                color: "white",
-                transition: "background-color 0.3s",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "#2563eb";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "#1d4ed8";
-              }}
-            >
-              Local Game
-            </Button>
-          </Link>
-          <Link to={'multiplayer-game'}>
-            <Button
-              type="primary"
-              block
-              size="large"
-              style={{
-                backgroundColor: "#059669",
-                borderColor: "#059669",
-                color: "white",
-                transition: "background-color 0.3s",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "#10b981";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "#059669";
-              }}
-            >
-              Multiplayer Game
-            </Button>
-          </Link>
-          <Link to={'tournament-game'}>
-            <Button
-              type="primary"
-              block
-              size="large"
-              style={{
-                backgroundColor: "#dc2626",
-                borderColor: "#dc2626",
-                color: "white",
-                transition: "background-color 0.3s",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "#ef4444";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "#dc2626";
-              }}
-            >
-              Tournament Game
-            </Button>
-          </Link>
+    <div className="relative min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-gray-900 flex flex-col items-center justify-center text-white">
+      
+      {/* Background Image */}
+      <div className="absolute inset-0 bg-cover bg-center opacity-40" style={{ backgroundImage: "url('/path-to-your-image.jpg')" }}></div>
+
+      {/* Hero Section */}
+      <div className="relative z-10 text-center p-8 max-w-lg mx-auto">
+        <h1 className="text-6xl font-bold mb-4">Connect 4</h1>
+        <p className="text-lg text-gray-200 mb-8">Choose your game mode and start playing!</p>
+      </div>
+
+      {/* Game Mode Cards */}
+      <div className="relative z-10 grid grid-cols-1 gap-6 max-w-md w-full mx-auto">
+        <Link to={'local-game'}>
+          <div className="p-6 bg-blue-500 hover:bg-blue-600 text-white rounded-xl shadow-lg transform hover:scale-105 transition-all flex items-center justify-between">
+            <UserOutlined className="text-2xl" />
+            <span className="ml-4 text-xl">Local Game</span>
+            <Button className="ml-auto" type="primary">Play</Button>
+          </div>
+        </Link>
+        <Link to={'multiplayer-game'}>
+          <div className="p-6 bg-green-500 hover:bg-green-600 text-white rounded-xl shadow-lg transform hover:scale-105 transition-all flex items-center justify-between">
+            <GlobalOutlined className="text-2xl" />
+            <span className="ml-4 text-xl">Multiplayer Game</span>
+            <Button className="ml-auto" type="primary">Play</Button>
+          </div>
+        </Link>
+        <Link to={'tournament-game'}>
+          <div className="p-6 bg-red-500 hover:bg-red-600 text-white rounded-xl shadow-lg transform hover:scale-105 transition-all flex items-center justify-between">
+            <TrophyOutlined className="text-2xl" />
+            <span className="ml-4 text-xl">Tournament Game</span>
+            <Button className="ml-auto" type="primary">Play</Button>
+          </div>
+        </Link>
+      </div>
+
+      {/* Footer */}
+      <div className="relative z-10 mt-12 text-center">
+        <p className="text-gray-300 text-sm">© 2024 Connect 4. All rights reserved.</p>
+        <div className="flex justify-center space-x-4 mt-2 text-gray-300 text-sm">
+          <Link to="/about" className="hover:text-white">About</Link>
+          <Link to="/help" className="hover:text-white">Help</Link>
+          <Link to="/settings" className="hover:text-white">Settings</Link>
         </div>
       </div>
+      
     </div>
   );
 }
