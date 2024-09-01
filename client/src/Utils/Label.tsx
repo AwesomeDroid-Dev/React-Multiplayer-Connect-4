@@ -1,6 +1,7 @@
 import { useContext } from "react"
 import { gameContext } from "../Game/Game"
 import { GameContextType } from "../Types/Grid.types"
+import { TextCoin } from "../assets/ConnectCoin"
 
 function Label({myTurn}: any) {
   const { turn, theme } = useContext(gameContext) as GameContextType
@@ -15,7 +16,7 @@ function Label({myTurn}: any) {
       </b>
     :
     <b className="leading-8 pb-[3px] text-2xl font-normal">
-      {turn === 'X' ? '🔴' : turn === 'O' ? '🔵' : ''}{myTurn===turn?'/ Your Turn':myTurn===''?'' : "/ Opponent's turn"}
+        {turn === 'X' || turn === 'O' ? <TextCoin turn={turn} transform="0.25rem" /> : ''}{myTurn===turn?'/ Your Turn':myTurn===''?'' : "/ Opponent's turn"}
     </b>
     }
     </div>

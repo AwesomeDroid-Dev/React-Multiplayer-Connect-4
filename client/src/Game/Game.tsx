@@ -92,7 +92,7 @@ function Game({multiplayer, data, myTurn, event, setEvent, defTurn, defGrid}: an
         <LeaveBtn />
         <div className='w-full h-12 items-center z-10'>
           <Label myTurn={myTurn} />
-          <UndoBtn/>
+          {!multiplayer && <UndoBtn/>}
         </div>
         <Grid myTurn={myTurn} />
       </div>

@@ -35,7 +35,7 @@ function Grid({myTurn}: any) {
       style={{width: `${gridSize}px`}}
       >
         {grid.map((_: XO, index: number) => (
-          <GridBox key={index} index={index} handleClick={handleClick} text={grid[index]} />
+          <GridBox key={index} index={index} handleClick={handleClick} text={grid[index]} gridSize={gridSize} />
         ))}
       </div>
   );

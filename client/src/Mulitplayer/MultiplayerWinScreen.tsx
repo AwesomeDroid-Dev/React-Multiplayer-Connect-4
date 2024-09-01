@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import Confetti from "react-confetti";
 import { GameContextType } from "../Types/Grid.types";
 import { gameContext } from "../Game/Game";
+import { TextCoin } from "../assets/ConnectCoin";
 
 function MultiplayerWinScreen({socket}: any) {
     const [windowSize, setWindowSize] = useState(window) as any;
@@ -39,7 +40,11 @@ function MultiplayerWinScreen({socket}: any) {
         {theme==='original'?
         <p className="-m-10">{winner===''?'Tie!':`${winner} Wins!`}</p>
         :
-        <p className="-m-10">{winner===''?'Tie!':`${winner==='X'?'🔴':'🔵'}Wins!`}</p>
+        <>
+        <b className="leading-8 pb-[3px] text-7xl font-bold">
+        {winner === '' ? 'Tie!' : <TextCoin size={30} turn={winner} transform="0.5rem" />}{winner !== 'none' ? ' Wins!' : ''}
+        </b>
+        </>
         }<br/>
         <div className="flex flex-row gap-3">
         {!requested?

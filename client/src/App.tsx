@@ -18,21 +18,21 @@ function App() {
       {/* Game Mode Cards */}
       <div className="relative z-10 grid grid-cols-1 gap-6 max-w-md w-full mx-auto">
         <Link to={'local-game'}>
-          <div className="p-6 bg-blue-500 hover:bg-blue-600 text-white rounded-xl shadow-lg transform hover:scale-105 transition-all flex items-center justify-between">
+          <div className="p-6 bg-blue-500 hover:!bg-blue-600 text-white rounded-xl shadow-lg transform hover:scale-105 transition-all flex items-center justify-between">
             <UserOutlined className="text-2xl" />
             <span className="ml-4 text-xl">Local Game</span>
             <Button className="ml-auto" type="primary">Play</Button>
           </div>
         </Link>
         <Link to={'multiplayer-game'}>
-          <div className="p-6 bg-green-500 hover:bg-green-600 text-white rounded-xl shadow-lg transform hover:scale-105 transition-all flex items-center justify-between">
+          <div className="p-6 bg-green-500 hover:!bg-green-600 text-white rounded-xl shadow-lg transform hover:scale-105 transition-all flex items-center justify-between">
             <GlobalOutlined className="text-2xl" />
             <span className="ml-4 text-xl">Multiplayer Game</span>
             <Button className="ml-auto" type="primary">Play</Button>
           </div>
         </Link>
         <Link to={'tournament-game'}>
-          <div className="p-6 bg-red-500 hover:bg-red-600 text-white rounded-xl shadow-lg transform hover:scale-105 transition-all flex items-center justify-between">
+          <div className="p-6 bg-red-500 hover:!bg-red-600 text-white rounded-xl shadow-lg transform hover:scale-105 transition-all flex items-center justify-between">
             <TrophyOutlined className="text-2xl" />
             <span className="ml-4 text-xl">Tournament Game</span>
             <Button className="ml-auto" type="primary">Play</Button>
@@ -42,12 +42,6 @@ function App() {
 
       {/* Footer */}
       <div className="relative z-10 mt-12 text-center">
-        <p className="text-gray-300 text-sm">© 2024 Connect 4. All rights reserved.</p>
-        <div className="flex justify-center space-x-4 mt-2 text-gray-300 text-sm">
-          <Link to="/about" className="hover:text-white">About</Link>
-          <Link to="/help" className="hover:text-white">Help</Link>
-          <Link to="/settings" className="hover:text-white">Settings</Link>
-        </div>
       </div>
       
     </div>

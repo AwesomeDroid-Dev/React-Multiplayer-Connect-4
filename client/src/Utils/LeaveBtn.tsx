@@ -17,7 +17,7 @@ function LeaveBtn() {
         footer={( _, { CancelBtn }) => (
             <>
               <CancelBtn />
-              <Button onClick={() => window.location.href = '/'} className="bg-red-600">Leave</Button>
+              <Button danger onClick={() => window.location.href = '/'}>Leave</Button>
             </>
         )}
         >

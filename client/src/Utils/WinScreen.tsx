@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from "react"
 import { gameContext } from "../Game/Game"
 import { GameContextType, XO } from "../Types/Grid.types"
 import Confetti from 'react-confetti'
+import { TextCoin } from "../assets/ConnectCoin"
 
 function WinScreen({multiplayer}: any) {
     const { setTurn, setMoves, setGrid, grid, latestChange, theme, winner, setWinner } = useContext(gameContext) as GameContextType
@@ -102,7 +103,9 @@ function WinScreen({multiplayer}: any) {
         {theme==='original'?
         <p className="-m-10">{winner===''?'Tie!':`${winner} Wins!`}</p>
         :
-        <p className="-m-10">{winner===''?'Tie!':`${winner==='X'?'🔴':'🔵'}Wins!`}</p>
+        <b className="leading-8 pb-[3px] text-7xl font-bold">
+            {winner === '' ? 'Tie!' : <TextCoin size={30} turn={winner} transform="0.5rem" />}{winner !== 'none' ? ' Wins!' : ''}
+        </b>
         }<br/>
         <button onClick={handleClick} className="bg-slate-500 p-2 text-xl font-normal text-gray-200 hover:bg-slate-400 rounded-md">Play Again!</button>
         </div>}

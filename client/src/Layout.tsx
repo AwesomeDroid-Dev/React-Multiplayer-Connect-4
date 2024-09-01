@@ -6,9 +6,9 @@ const Layout = () => {
     <>
       <ConfigProvider
     theme={{
-      /* token: {
-        colorPrimary: 'blue',
-      }, */
+      token: {
+        borderRadius: 8,
+      },
       algorithm: theme.darkAlgorithm,
     }}
     >
