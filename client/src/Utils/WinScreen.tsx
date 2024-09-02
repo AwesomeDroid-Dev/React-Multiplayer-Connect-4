@@ -3,6 +3,7 @@ import { gameContext } from "../Game/Game"
 import { GameContextType, XO } from "../Types/Grid.types"
 import Confetti from 'react-confetti'
 import { TextCoin } from "../assets/ConnectCoin"
+import { Button } from "antd"
 
 function WinScreen({multiplayer}: any) {
     const { setTurn, setMoves, setGrid, grid, latestChange, theme, winner, setWinner } = useContext(gameContext) as GameContextType
@@ -93,7 +94,7 @@ function WinScreen({multiplayer}: any) {
 
   return (
     <>
-    {show&&<div className="select-none flex flex-col absolute h-screen w-screen z-50 bg-opacity-70 items-center justify-center font-bold text-7xl text-slate-800 bg-slate-200">
+    {show&&<div className="select-none flex flex-col absolute h-screen w-screen z-50 bg-opacity-70 items-center justify-center font-bold text-7xl text-gray-800 bg-gray-800">
         <Confetti
         recycle={false}
         width={windowSize.innerWidth}
@@ -103,11 +104,11 @@ function WinScreen({multiplayer}: any) {
         {theme==='original'?
         <p className="-m-10">{winner===''?'Tie!':`${winner} Wins!`}</p>
         :
-        <b className="leading-8 pb-[3px] text-7xl font-bold">
-            {winner === '' ? 'Tie!' : <TextCoin size={30} turn={winner} transform="0.5rem" />}{winner !== 'none' ? ' Wins!' : ''}
+        <b className="leading-8 pb-[3px] text-white text-7xl font-bold">
+            {winner === '' ? 'Tie!' : <TextCoin size={30} turn={winner} transform="0.5rem" strokeSize={2} />}{winner !== 'none' ? ' Wins!' : ''}
         </b>
         }<br/>
-        <button onClick={handleClick} className="bg-slate-500 p-2 text-xl font-normal text-gray-200 hover:bg-slate-400 rounded-md">Play Again!</button>
+        <Button onClick={handleClick} type="primary" className="p-5 text-xl font-normal bg-green-600 hover:!bg-green-500">Play Again!</Button>
         </div>}
     </>
   )

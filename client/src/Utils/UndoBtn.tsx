@@ -1,5 +1,6 @@
 import { useContext } from "react"
 import { gameContext } from "../Game/Game"
+import { Button } from "antd"
 
 function UndoBtn() {
     const {moves, setMoves, setGrid, setTurn, setLatestChange} = useContext(gameContext)
@@ -18,7 +19,7 @@ function UndoBtn() {
     }
 
   return (
-    <button onClick={handleClick} className="bg-slate-500 m-2 font-semibold float-right text-lg px-2 py-1 rounded-md text-gray-100 hover:bg-slate-600 ml-3 transition-colors duration-100">Undo</button>
+    <Button onClick={handleClick} type="primary" danger className="m-2 font-semibold float-right text-lg px-2 py-1">Undo</Button>
   )
 }
 

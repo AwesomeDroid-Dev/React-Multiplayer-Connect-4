@@ -24,7 +24,7 @@ function GridBox(props: { handleClick: (arg0: any) => void; index: number; text:
         onClick={() => props.handleClick(props.index)}
         className={theme==='new'
           ?
-          `relative w-full aspect-square bg-yellow-400 border border-gray-400 rounded-md hover:cursor-pointer flex items-center justify-center`
+          `relative w-full aspect-square bg-gray-600 border border-gray-400 rounded-md hover:cursor-pointer flex items-center justify-center`
           :
           `relative w-full aspect-square bg-blue-500 text-3xl font-bold text-white hover:cursor-pointer`
         }

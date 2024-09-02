@@ -7,7 +7,7 @@ function Label({myTurn}: any) {
   const { turn, theme } = useContext(gameContext) as GameContextType
 
   return (
-    <div className="text-2xl inline-block m-2 items-center">Turn: 
+    <div className="text-2xl inline-block m-2 items-center text-white font-semibold">Turn: 
     {
     theme==='original'
     ?
