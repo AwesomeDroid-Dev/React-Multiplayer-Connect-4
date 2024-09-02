@@ -1,9 +1,10 @@
 import CreateGame from "../Mulitplayer/CreateGame";
 import Game from "../Game/Game"
 import io from "socket.io-client"
-import LeaveBtn from "../Utils/LeaveBtn";
 import { useEffect, useState } from "react";
 import LogginScreen from "../Mulitplayer/LogginScreen";
+import AccountBtn from "../Mulitplayer/AccountBtn";
+import LeaveBtn from "../Utils/LeaveBtn";
 
 const socket = io('http://localhost:5009')
 socket.connect();
@@ -15,6 +16,8 @@ function MultiplayerGame() {
   const [event, setEvent] = useState('')
   const [beginData, setBeginData] = useState({turn: 'X', game: Array(42).fill('')})
   const [username, setUsername] = useState(localStorage.getItem('username'))
+  const [showLogin, setShowLogin] = useState(true)
+  const [loginError, setLoginError] = useState<string>('')
   
   socket.on('start-game', (data: any) => {
     //players = {X: socket.id 1, O: socket.id 2}
@@ -37,6 +40,8 @@ function MultiplayerGame() {
   useEffect(() => {
     if (username) {
       socket.emit('login', {username})
+    } else {
+      setShowLogin(false)
     }
   }, [])
 
@@ -45,20 +50,28 @@ function MultiplayerGame() {
     if (data.status === 'success') {
         localStorage.setItem('username', username?username:'')
         localStorage.setItem('loggedIn', `true`)
+        setShowLogin(true)
+    } else {
+        setUsername(null)
+        setShowLogin(false)
+        setLoginError(data.message)
     }
 })
 
   return (
     <>
-    <LeaveBtn />
     {
-    username ? 
+    showLogin ? 
     <>
+    <AccountBtn />
     {createGameMenu && <CreateGame socket={socket} />}
     {!createGameMenu && <Game defTurn={beginData.turn} defGrid={beginData.game} multiplayer={true} data={socket} myTurn={myTurn} event={event} setEvent={setEvent} /> }
     </>
     :
-    <LogginScreen socket={socket} setUsername={setUsername} />
+    <>
+    <LeaveBtn />
+    <LogginScreen socket={socket} setUsername={setUsername} error={loginError} />
+    </>
     }
     </>
   )

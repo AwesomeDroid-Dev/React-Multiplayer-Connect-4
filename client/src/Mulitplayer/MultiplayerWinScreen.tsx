@@ -42,7 +42,7 @@ function MultiplayerWinScreen({socket}: any) {
         <p className="-m-10">{winner===''?'Tie!':`${winner} Wins!`}</p>
         :
         <>
-        <b className="leading-8 pb-[3px] text-7xl font-bold">
+        <b className="leading-8 pb-[3px] text-7xl font-bold text-white">
         {winner === '' ? 'Tie!' : <TextCoin size={30} turn={winner} transform="0.5rem" />}{winner !== 'none' ? ' Wins!' : ''}
         </b>
         </>

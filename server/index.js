@@ -35,8 +35,14 @@ io.on('connection', (socket) => {
     })
 
     socket.on('login', (data) => {
-        if (typeof users[data.username] !== 'undefined') {
+        if (!data.username || data.username.includes(' ') || /[!@#$%^&*(),.?":{}|<>\-_=+]/.test(data.username)) {
+            socket.emit('login', {status: 'error', message: 'Invalid username (Spaces or special characters)'});
+            return
+        }
+
+        if (typeof users[data.username] !== 'undefined' && users[data.username] !== socket.id) {
             socket.emit('login', {status: 'error', message: 'Username already taken'});
+            return
         };
         if (users[data.username] === undefined) users[data.username] = socket.id
         username = data.username
