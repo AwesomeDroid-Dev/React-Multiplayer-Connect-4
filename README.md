@@ -26,7 +26,7 @@ cd server
 npm install
 npm start
 ```
-## Demo
+## Images
 
 ![Screenshot 2024-09-07 105149](https://github.com/user-attachments/assets/47e104d5-c919-4b09-b912-3e20dad04fbd)
 
