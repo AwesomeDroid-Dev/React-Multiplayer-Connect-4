@@ -5,10 +5,11 @@ import { GameContextType } from '../Types/Grid.types';
 import WinScreen from '../Utils/WinScreen';
 import UndoBtn from '../Utils/UndoBtn';
 import MultiplayerWinScreen from '../Mulitplayer/MultiplayerWinScreen';
+import TournamentWinScreen from '../Tournament/TournamentWInScreen';
 
 export const gameContext: React.Context<any> = createContext(null)
 
-function Game({multiplayer, data, myTurn, event, setEvent, defTurn, defGrid}: any) {
+function Game({multiplayer, data, myTurn, event, setEvent, defTurn, defGrid, tournament}: any) {
   const [grid, setGrid] = useState(defGrid)
   const [turn, setTurn] = useState(defTurn)
   const [latestChange, setLatestChange] = useState(-1);
@@ -84,7 +85,13 @@ function Game({multiplayer, data, myTurn, event, setEvent, defTurn, defGrid}: an
       <div className='flex items-center justify-center w-screen h-screen flex-col p-[5vw] bg-gray-800'>
         {winner!=='none' && multiplayer
         ? 
+        tournament
+        
+        ?
+        <TournamentWinScreen socket={data} />
+        :
         <MultiplayerWinScreen socket={data} />
+
         :
         <WinScreen multiplayer={multiplayer} />
         }
@@ -107,6 +114,7 @@ Game.defaultProps = {
   setEvent: () => {},
   defTurn: 'X',
   defGrid: Array(42).fill(''),
+  tournament: false,
 }
 
 export default Game

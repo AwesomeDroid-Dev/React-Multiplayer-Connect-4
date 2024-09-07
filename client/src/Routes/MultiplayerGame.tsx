@@ -20,9 +20,8 @@ function MultiplayerGame() {
   const [loginError, setLoginError] = useState<string>('')
   
   socket.on('start-game', (data: any) => {
-    //players = {X: socket.id 1, O: socket.id 2}
-    console.log('start game 1')
-    setMyTurn(data.players.X === socket.id ? 'X' : 'O')
+    console.log('start game 1', data, username)
+    setMyTurn(data.players.X === username ? 'X' : 'O')
     setCreateGameMenu(false)
     setEvent('start-game')
   })
@@ -32,7 +31,7 @@ function MultiplayerGame() {
       setBeginData(c => {c.game = data; return c})
     })
     socket.on('turn', (data: any) => {
-      console.log('turn')
+      console.log('turn', data)
       setBeginData(c => {c.turn = data; return c})
     })
   }

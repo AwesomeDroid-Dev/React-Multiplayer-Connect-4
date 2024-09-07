@@ -19,7 +19,7 @@ function UndoBtn() {
     }
 
   return (
-    <Button onClick={handleClick} type="primary" danger className="m-2 font-semibold float-right text-lg px-2 py-1">Undo</Button>
+    <Button onClick={handleClick} type="primary" danger className="m-2 font-semibold float-right text-lg px-2 py-1 md:text-2xl md:px-3 md:py-5">Undo</Button>
   )
 }
 

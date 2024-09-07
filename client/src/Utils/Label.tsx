@@ -7,16 +7,16 @@ function Label({myTurn}: any) {
   const { turn, theme } = useContext(gameContext) as GameContextType
 
   return (
-    <div className="text-2xl inline-block m-2 items-center text-white font-semibold">Turn: 
+    <div className="text-2xl md:text-4xl inline-block m-2 items-center text-white font-semibold">
     {
     theme==='original'
     ?
     <b>
-      {turn==='X'?'🗙':turn==='O'?'O':''}{myTurn===turn?'/ Your Turn':myTurn===''?'' : "/ Opponent's turn"}
+      Turn: {turn==='X'?'🗙':turn==='O'?'O':''}{myTurn===turn?'/ Your Turn':myTurn===''?'' : "/ Opponent's turn"}
       </b>
     :
-    <b className="leading-8 pb-[3px] text-2xl font-normal">
-        {turn === 'X' || turn === 'O' ? <TextCoin turn={turn} transform="0.25rem" /> : ''}{myTurn===turn?'/ Your Turn':myTurn===''?'' : "/ Opponent's turn"}
+    <b className="pb-2 text-3xl md:text-4xl font-normal">
+        Turn:{turn === 'X' || turn === 'O' ? <TextCoin turn={turn} size={window.innerWidth < 768 ? 15 : 15} transform="0.25rem" /> : ''}{myTurn===turn?'/ Your Turn':myTurn===''?'' : "/ Opponent's turn"}
     </b>
     }
     </div>

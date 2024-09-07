@@ -2,6 +2,7 @@
   "name": "server",
   "version": "1.0.0",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "start": "nodemon index.js"
   },
@@ -9,7 +10,9 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "es6": "^0.0.7",
     "express": "^4.19.2",
+    "import-export": "^1.0.1",
     "socket.io": "^4.7.5"
   },
   "devDependencies": {

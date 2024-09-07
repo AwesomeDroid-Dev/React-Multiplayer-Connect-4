@@ -34,7 +34,7 @@ function App() {
         <Link to={'tournament-game'}>
           <div className="p-6 bg-red-500 hover:!bg-red-600 text-white rounded-xl shadow-lg transform hover:scale-105 transition-all flex items-center justify-between">
             <TrophyOutlined className="text-2xl" />
-            <span className="ml-4 text-xl">Tournament Game</span>
+            <span className="ml-4 text-xl">Tournament Game (WIP)</span>
             <Button className="ml-auto" type="primary">Play</Button>
           </div>
         </Link>
