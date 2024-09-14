@@ -1,14 +1,11 @@
 import Game from "../Game/Game"
-import io from "socket.io-client"
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import LogginScreen from "../Mulitplayer/LogginScreen";
 import AccountBtn from "../Mulitplayer/AccountBtn";
 import LeaveBtn from "../Utils/LeaveBtn";
 import CreateTournament from "../Tournament/CreateTournament";
-
-const socket = io('http://localhost:5009')
-socket.connect();
-
+import TournamentDisplay from "../Tournament/TournamentDisplay";
+import socket from '../Mulitplayer/Socket';
 
 function TournamentGame() {
   const [createGameMenu, setCreateGameMenu] = useState(true)
@@ -17,11 +14,15 @@ function TournamentGame() {
   const [beginData, setBeginData] = useState({turn: 'X', game: Array(42).fill('')})
   const [username, setUsername] = useState(localStorage.getItem('username'))
   const [showLogin, setShowLogin] = useState(true)
+  const [tournamentOrder, setTournamentOrder] = useState([]) as any
+  const [showTournamentOrder, setShowTournamentOrder] = useState(false)
   const [loginError, setLoginError] = useState<string>('')
+  const [enemyUsername, setEnemyUsername] = useState<string>('')
   
   socket.on('start-game', (data: any) => {
     //players = {X: socket.id 1, O: socket.id 2}
     console.log(data)
+    setEnemyUsername(data.players.X !== username ? data.players.X : data.players.O)
     setMyTurn(data.players.X === username ? 'X' : 'O')
     setCreateGameMenu(false)
     setEvent('start-game')
@@ -36,14 +37,14 @@ function TournamentGame() {
       setBeginData(c => {c.turn = data; return c})
     })
   }
-  
-  useEffect(() => {
+
+  socket.on('connect', () => {
     if (username) {
       socket.emit('login', {username})
     } else {
       setShowLogin(false)
     }
-  }, [])
+  })
 
 
   socket.on('login', (data: any) => {
@@ -58,14 +59,24 @@ function TournamentGame() {
     }
 })
 
+  socket.on('next-round', (data) => {
+    setTournamentOrder(data.tournamentOrder)
+    console.log(data)
+    setShowTournamentOrder(true)
+  });
+
   return (
       <>
       {
       showLogin ? 
       <>
       <AccountBtn />
-      {createGameMenu && <CreateTournament socket={socket} />}
-      {!createGameMenu && <Game defTurn={beginData.turn} defGrid={beginData.game} multiplayer={true} tournament={true} data={socket} myTurn={myTurn} event={event} setEvent={setEvent} /> }
+      {createGameMenu ? 
+      <CreateTournament socket={socket} /> :
+      showTournamentOrder ?
+      <TournamentDisplay tree={tournamentOrder} /> :
+      <Game defTurn={beginData.turn} defGrid={beginData.game} multiplayer={true} tournament={true} data={socket} myTurn={myTurn} event={event} setEvent={setEvent} opponent={enemyUsername} /> 
+      }
       </>
       :
       <>

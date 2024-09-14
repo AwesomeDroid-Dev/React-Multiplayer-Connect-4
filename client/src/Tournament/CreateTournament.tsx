@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button, Input, InputNumber, Select } from "antd";
 import { CopyToClipboard } from 'react-copy-to-clipboard';
+import OrganizeTournament from "./OrganizeTournament/OrganizeTournament";
 
 function CreateTournament({ socket }: any) {
     const [createGameCode, setCreateGameCode] = useState('Loading...');
@@ -12,6 +13,12 @@ function CreateTournament({ socket }: any) {
     const [copied, setCopied] = useState(false);
     const [playerCount, setPlayerCount] = useState(4);
     const [players, setPlayers] = useState(['You']) as any;
+    const [organization, setOrganization] = useState([
+        ['Noureddin', 'Ahmed', 'Omayma', 'Youssuf', 'Aseya'],
+        ['Winner 1', 'Winner 2', 'Winner 3'],
+        ['Winner 1', 'Winner 2'],
+        ['Winner!']
+    ]) as any;
 
     function handleCreateTournament() {
         setCurrentMenu('createGame');
@@ -39,9 +46,15 @@ function CreateTournament({ socket }: any) {
         socket.emit('invite', { tournament: createGameCode, username: inviteInput });
     }
 
+    function handleOrganized() {
+        socket.emit('organize-tournament', { organization: organization, tournament: createGameCode });
+    }
+
     socket.on('invite', (data: any) => {
         setInvites((inv: any[]) => inv.filter((i: any) => i.sender !== data.sender));
         setInvites((i: any) => [...i, { sender: data.sender, gameCode: data.gameCode }]);
+
+        handleJoinTournament(data.gameCode);
     });
 
     socket.on('create-tournament', (data: any) => {
@@ -57,12 +70,8 @@ function CreateTournament({ socket }: any) {
 
     socket.on('organize-tournament', (data: any) => {
         console.log('organize-tournament', data)
-    });
-
-    socket.on('join-game', (data: any) => {
-        if (data.status === 'error') {
-            return;
-        }
+        setOrganization(data.organization);
+        setCurrentMenu('organizing');
     });
 
     socket.on('assign-game', (data: any) => {
@@ -73,9 +82,7 @@ function CreateTournament({ socket }: any) {
 
     return (
         <div className="flex justify-center items-center w-screen h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-gray-900">
-            {/* Background Image */}
-            <div className="absolute inset-0 bg-cover bg-center opacity-40" style={{ backgroundImage: "url('/path-to-your-image.jpg')" }}></div>
-
+            
             {/* Create Game Menu */}
             {
                 currentMenu === 'createGame' &&
@@ -186,10 +193,16 @@ function CreateTournament({ socket }: any) {
             }
 
             {/* Organizing */}
+            {
+                currentMenu === 'organizing' &&
+                <div className="z-10">
+                    <OrganizeTournament organization={organization} setOrganization={setOrganization} handleOrganized={handleOrganized} />
+                </div>
+            }
 
             {/* Error Menu */}
             {
-                currentMenu !== 'createGame' && currentMenu !== 'settingMenu' && currentMenu !== 'default' &&
+                currentMenu !== 'createGame' && currentMenu !== 'settingMenu' && currentMenu !== 'default' && currentMenu !== 'waiting' && currentMenu !== 'organizing' &&
                 <div className="relative z-10 bg-gray-700 bg-opacity-60 backdrop-blur p-8 rounded-lg shadow-lg flex flex-col items-center">
                     <p className="text-white text-lg">Something went wrong</p>
                 </div>

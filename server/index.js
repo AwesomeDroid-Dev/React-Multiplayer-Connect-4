@@ -5,6 +5,7 @@ import { Server } from 'socket.io';
 import cors from 'cors';
 import { Game } from './Game Data/Game.js';
 import { Tournament } from './Game Data/Tournament.js';
+import { isString } from 'util';
 
 app.use(cors())
 
@@ -84,7 +85,7 @@ io.on('connection', (socket) => {
         }
         myTurn = games[gameCode].players.X === username ? 'X' : 'O'
         socket.join(gameCode)
-        socket.emit('join-game', {status: 'success', ...games[gameCode].players})
+        io.emit('join-game', {status: 'success', ...games[gameCode].players})
         startGame(gameCode)
     });
 
@@ -93,10 +94,15 @@ io.on('connection', (socket) => {
         tournamentCode = genCode();
         tournaments[tournamentCode] = new Tournament([], playerCount, tournamentCode)
         tournaments[tournamentCode].addPlayer(username)
+        tournaments[tournamentCode].setOrganizer(username)
         socket.join(tournamentCode)
         console.log('Create Tournament')
         socket.emit('create-tournament', { tournamentCode });
     });
+
+    socket.on('next-round', () => {
+        socket.emit('next-round', { tournamentOrder: tournaments[tournamentCode].getTournamentOrder() });
+    })
 
     socket.on('join-tournament', ({ tournament }) => {
         if (typeof tournaments[tournament] === 'undefined') return;
@@ -115,34 +121,28 @@ io.on('connection', (socket) => {
         io.to(tournamentCode).emit('join-tournament', { status: 'success', username });
 
         if (tournaments[tournamentCode].players.length === tournaments[tournamentCode].playerCount) {
-            startTournament(tournamentCode)
+            console.log(tournaments[tournamentCode].tournamentOrder)
+            io.to( users[tournaments[tournamentCode].organizer] ).emit('organize-tournament', { organization: tournaments[tournamentCode].tournamentOrder.map(u => u.map(i => String(i) === i ? i : `Winner ${i}`)) });
         }
+    });
+
+    socket.on('organize-tournament', (data) => {
+        if (typeof tournaments[tournamentCode] === 'undefined') return;
+        tournaments[tournamentCode].players = data.organization[0]
+        tournaments[tournamentCode].tournamentOrder = data.organization.map(u => u.map(i => i.includes('Winner ') ? Number((i).split(' ')[1]) : i))
+        startTournament(tournamentCode)
     });
 
     socket.on('play', (data) => {
         games[gameCode].play(data.latestChange, myTurn)
 
+        games[gameCode].switchTurn()
+
+        io.to(gameCode).emit('play', {grid: games[gameCode].game, turn: games[gameCode].turn, latestChange: data.latestChange})
+        
         const win = games[gameCode].win(data.latestChange)
 
-        games[gameCode].switchTurn()
-        if (win) {
-            io.to(gameCode).emit('win', myTurn)
-            games[gameCode].winner = myTurn
-        } else if (!games[gameCode].game.includes('')) {
-            io.to(gameCode).emit('win', '')
-            games[gameCode].winner = ''
-        }
-        io.to(gameCode).emit('play', {grid: games[gameCode].game, turn: games[gameCode].turn, latestChange: data.latestChange})
-        if (!games[gameCode].tournament) {
-            return;
-        }
-        if (win) {
-            tournaments[games[gameCode].tournament].putInFinishedPlayers(username)
-            tournaments[games[gameCode].tournament].putInSpectating(games[gameCode].players[myTurn==='X'?'O':'X'])
-        } else {
-            tournaments[games[gameCode].tournament].putInFinishedPlayers(username)
-            tournaments[games[gameCode].tournament].putInFinishedPlayers(games[gameCode].players[myTurn==='X'?'O':'X'])
-        }
+        gameWin(gameCode, win)
     });
 
     socket.on('request-rematch', () => {
@@ -188,11 +188,26 @@ function startGame(gameCode) {
     io.to(gameCode).emit('turn', games[gameCode].turn)
 }
 
+function gameWin(gameCode, win) {
+    games[gameCode].winner = win
+    io.to(gameCode).emit('win', games[gameCode].winner)
+
+    if (!games[gameCode].tournament) return;
+    if (win === false) {
+        tournaments[games[gameCode].tournament].putInFinishedPlayers(games[gameCode].players[win])
+        tournaments[games[gameCode].tournament].putInSpectating(games[gameCode].players[win])
+    } else {
+        tournaments[games[gameCode].tournament].putInFinishedPlayers(games[gameCode].players[win])
+        tournaments[games[gameCode].tournament].putInFinishedPlayers(games[gameCode].players[win])
+    }
+}
+
 function startTournament(tournamentCode) {
     const tournament = tournaments[tournamentCode]
 
     for (let i = 0; i < tournament.playerCount; i += 2) {
         if (i === tournament.playerCount + 1) {
+            tournaments[tournamentCode].putInFinishedPlayers(tournament.players[i])
             break
         }
         const gameCode = genCode();
@@ -203,11 +218,11 @@ function startTournament(tournamentCode) {
             tournament.players[i]
         );
         games[gameCode].begin = games[gameCode].turn
-        tournament.addGame(gameCode)
+        tournaments[tournamentCode].addGame(gameCode)
         console.log(tournament.players)
         io.to(users[ tournament.players[i] ]).emit('assign-game', {gameCode})
         io.to(users[ tournament.players[i + 1] ]).emit('assign-game', {gameCode})
-        tournament.putInCurrentlyPlaying(tournament.players[i])
-        tournament.putInCurrentlyPlaying(tournament.players[i + 1])
+        tournaments[tournamentCode].putInCurrentlyPlaying(tournament.players[i])
+        tournaments[tournamentCode].putInCurrentlyPlaying(tournament.players[i + 1])
     }
 }

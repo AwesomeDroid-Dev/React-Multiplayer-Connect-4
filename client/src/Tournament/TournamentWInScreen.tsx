@@ -20,6 +20,11 @@ function TournamentWinScreen({socket}: any) {
     function handleClick() {
         socket.emit('next-round', {gameCode:code})
     }
+    
+    socket.on('next-round', (data: { status: string; message: string; })=>{
+        if (data.status==='error')
+            window.alert(data.message)
+    })
 
     return (
         <>

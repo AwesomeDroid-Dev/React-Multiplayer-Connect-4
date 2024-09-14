@@ -16,6 +16,8 @@ export class Game {
     }
 
     win(index) {
+        if (!this.game.includes('')) return ''
+
         const directions = [
             { colDir: 1, rowDir: 0 },  // Horizontal
             { colDir: 0, rowDir: 1 },  // Vertical
@@ -46,7 +48,7 @@ export class Game {
             let c = col + colDir;
             while (inBounds(r, c) && getBoardValue(r, c) === player) {
                 count++;
-                if (count === 4) return true;
+                if (count === 4) return this.turn;
                 r += rowDir;
                 c += colDir;
             }
@@ -57,7 +59,7 @@ export class Game {
             c -= colDir;
             while (inBounds(r, c) && getBoardValue(r, c) === player) {
                 count++;
-                if (count === 4) return true;
+                if (count === 4) return this.turn;
                 r -= rowDir;
                 c -= colDir;
             }

@@ -3,7 +3,7 @@ import { gameContext } from "../Game/Game"
 import { GameContextType } from "../Types/Grid.types"
 import { TextCoin } from "../assets/ConnectCoin"
 
-function Label({myTurn}: any) {
+function Label({myTurn, opponent}: any) {
   const { turn, theme } = useContext(gameContext) as GameContextType
 
   return (
@@ -16,7 +16,7 @@ function Label({myTurn}: any) {
       </b>
     :
     <b className="pb-2 text-3xl md:text-4xl font-normal">
-        Turn:{turn === 'X' || turn === 'O' ? <TextCoin turn={turn} size={window.innerWidth < 768 ? 15 : 15} transform="0.25rem" /> : ''}{myTurn===turn?'/ Your Turn':myTurn===''?'' : "/ Opponent's turn"}
+        Turn:{turn === 'X' || turn === 'O' ? <TextCoin turn={turn} size={window.innerWidth < 768 ? 15 : 15} transform="0.25rem" /> : ''}{myTurn===turn?'/ Your Turn':myTurn===''?'' : `/ ${opponent}'s turn`}
     </b>
     }
     </div>

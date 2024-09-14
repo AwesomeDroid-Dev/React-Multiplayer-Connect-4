@@ -9,7 +9,7 @@ import TournamentWinScreen from '../Tournament/TournamentWInScreen';
 
 export const gameContext: React.Context<any> = createContext(null)
 
-function Game({multiplayer, data, myTurn, event, setEvent, defTurn, defGrid, tournament}: any) {
+function Game({multiplayer, data, myTurn, event, setEvent, defTurn, defGrid, tournament, opponent}: any) {
   const [grid, setGrid] = useState(defGrid)
   const [turn, setTurn] = useState(defTurn)
   const [latestChange, setLatestChange] = useState(-1);
@@ -96,7 +96,7 @@ function Game({multiplayer, data, myTurn, event, setEvent, defTurn, defGrid, tou
         <WinScreen multiplayer={multiplayer} />
         }
         <div className='w-full h-12 items-center z-10'>
-          <Label myTurn={myTurn} />
+          <Label myTurn={myTurn} opponent={opponent} />
           {!multiplayer && <UndoBtn/>}
         </div>
         <Grid myTurn={myTurn} />
@@ -115,6 +115,7 @@ Game.defaultProps = {
   defTurn: 'X',
   defGrid: Array(42).fill(''),
   tournament: false,
+  opponent: 'opponent',
 }
 
 export default Game

@@ -1,14 +1,10 @@
 import CreateGame from "../Mulitplayer/CreateGame";
 import Game from "../Game/Game"
-import io from "socket.io-client"
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import LogginScreen from "../Mulitplayer/LogginScreen";
 import AccountBtn from "../Mulitplayer/AccountBtn";
 import LeaveBtn from "../Utils/LeaveBtn";
-
-const socket = io('http://localhost:5009')
-socket.connect();
-
+import socket from '../Mulitplayer/Socket';
 
 function MultiplayerGame() {
   const [createGameMenu, setCreateGameMenu] = useState(true)
@@ -18,9 +14,11 @@ function MultiplayerGame() {
   const [username, setUsername] = useState(localStorage.getItem('username'))
   const [showLogin, setShowLogin] = useState(true)
   const [loginError, setLoginError] = useState<string>('')
+  const [enemyUsername, setEnemyUsername] = useState<string>('')
   
   socket.on('start-game', (data: any) => {
     console.log('start game 1', data, username)
+    setEnemyUsername(data.players.X !== username ? data.players.X : data.players.O)
     setMyTurn(data.players.X === username ? 'X' : 'O')
     setCreateGameMenu(false)
     setEvent('start-game')
@@ -36,13 +34,13 @@ function MultiplayerGame() {
     })
   }
   
-  useEffect(() => {
+  socket.on('connect', () => {
     if (username) {
       socket.emit('login', {username})
     } else {
       setShowLogin(false)
     }
-  }, [])
+  })
 
 
   socket.on('login', (data: any) => {
@@ -64,7 +62,7 @@ function MultiplayerGame() {
     <>
     <AccountBtn />
     {createGameMenu && <CreateGame socket={socket} />}
-    {!createGameMenu && <Game defTurn={beginData.turn} defGrid={beginData.game} multiplayer={true} data={socket} myTurn={myTurn} event={event} setEvent={setEvent} /> }
+    {!createGameMenu && <Game defTurn={beginData.turn} defGrid={beginData.game} multiplayer={true} data={socket} myTurn={myTurn} event={event} setEvent={setEvent} opponent={enemyUsername} /> }
     </>
     :
     <>
