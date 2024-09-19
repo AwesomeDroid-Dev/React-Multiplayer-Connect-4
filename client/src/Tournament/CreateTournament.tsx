@@ -1,93 +1,106 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Input, InputNumber, Select } from "antd";
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import OrganizeTournament from "./OrganizeTournament/OrganizeTournament";
+import TournamentDisplay from "./TournamentDisplay";
 
-function CreateTournament({ socket }: any) {
+function CreateTournament({ socket, currentMenu, setCurrentMenu, tournamentOrder, setTournamentOrder }: any) {
     const [createGameCode, setCreateGameCode] = useState('Loading...');
     const [betweenGame, setBetweenGame] = useState('keep');
     const [textInputCode, setTextInputCode] = useState('');
     const [inviteInput, setInviteInput] = useState('');
-    const [currentMenu, setCurrentMenu] = useState('default');
-    const [invites, setInvites] = useState([]) as any;
+    const [invites, setInvites] = useState<any[]>([]);
     const [copied, setCopied] = useState(false);
     const [playerCount, setPlayerCount] = useState(4);
-    const [players, setPlayers] = useState(['You']) as any;
-    const [organization, setOrganization] = useState([
-        ['Noureddin', 'Ahmed', 'Omayma', 'Youssuf', 'Aseya'],
-        ['Winner 1', 'Winner 2', 'Winner 3'],
-        ['Winner 1', 'Winner 2'],
-        ['Winner!']
-    ]) as any;
+    const [players, setPlayers] = useState(['You']);
+    const [organization, setOrganization] = useState<any[]>([]);
 
-    function handleCreateTournament() {
+    // Handling socket events inside useEffect
+    useEffect(() => {
+        const handleInvite = (data: any) => {
+            setInvites((prevInvites) => prevInvites.filter((i) => i.sender !== data.sender));
+            setInvites((prev) => [...prev, { sender: data.sender, gameCode: data.gameCode }]);
+            handleJoinTournament(data.gameCode);
+        };
+
+        const handleCreateTournament = (data: any) => {
+            setCreateGameCode(data.tournamentCode);
+        };
+
+        const handleJoinTournament = (data: any) => {
+            if (data.status === 'success') {
+                setPlayers((prev) => [...prev.filter((p) => p !== data.username), data.username]);
+            }
+        };
+
+        const handleOrganizeTournament = (data: any) => {
+            setOrganization(data.organization);
+            setCurrentMenu('organizing');
+        };
+
+        const handleAssignGame = (data: any) => {
+            handleJoinGame(data.gameCode);
+        };
+
+        const handleUpdateOrder = (data: any) => {
+            setTournamentOrder(data.tournamentOrder);
+        };
+      
+        socket.on('invite', handleInvite);
+        socket.on('create-tournament', handleCreateTournament);
+        socket.on('join-tournament', handleJoinTournament);
+        socket.on('organize-tournament', handleOrganizeTournament);
+        socket.on('assign-game', handleAssignGame);
+        socket.on('update-order', handleUpdateOrder);
+
+
+        // Cleanup listeners on unmount
+        return () => {
+            socket.off('invite', handleInvite);
+            socket.off('create-tournament', handleCreateTournament);
+            socket.off('join-tournament', handleJoinTournament);
+            socket.off('organize-tournament', handleOrganizeTournament);
+            socket.off('assign-game', handleAssignGame);
+            socket.off('update-order', handleUpdateOrder);
+        };
+    }, []);
+
+    const startTournament = () => {
         setCurrentMenu('createGame');
         setCreateGameCode('Loading...');
-        socket.emit('create-tournament', { playerCount: playerCount });
-    }
+        socket.emit('create-tournament', { playerCount });
+    };
 
-    function handleJoinTournament(gameCode: any) {
-        if (gameCode) {
-            socket.emit('join-tournament', { tournament: gameCode });
-            return;
-        }
-        socket.emit('join-tournament', { tournament: textInputCode });
-    }
+    const handleJoinTournament = (gameCode: string | undefined) => {
+        socket.emit('join-tournament', { tournament: gameCode || textInputCode });
+    };
 
-    function handleJoinGame(gameCode: any) {
-        if (gameCode) {
-            socket.emit('join-game', { gameCode });
-            return;
-        }
-        socket.emit('join-game', { gameCode: textInputCode });
-    }
+    const handleJoinGame = (gameCode: string | undefined) => {
+        socket.emit('join-game', { gameCode: gameCode || textInputCode });
+    };
 
-    function handleInvite() {
+    const handleInvite = () => {
         socket.emit('invite', { tournament: createGameCode, username: inviteInput });
-    }
+    };
 
-    function handleOrganized() {
-        socket.emit('organize-tournament', { organization: organization, tournament: createGameCode });
-    }
+    const handleOrganized = () => {
+        socket.emit('organize-tournament', { organization, tournament: createGameCode });
+    };
 
-    socket.on('invite', (data: any) => {
-        setInvites((inv: any[]) => inv.filter((i: any) => i.sender !== data.sender));
-        setInvites((i: any) => [...i, { sender: data.sender, gameCode: data.gameCode }]);
-
-        handleJoinTournament(data.gameCode);
-    });
-
-    socket.on('create-tournament', (data: any) => {
-        setCreateGameCode(data.tournamentCode);
-    });
-
-    socket.on('join-tournament', (data: any) => {
-        if (data.status === 'success') {
-            setPlayers((p: any) => p.filter((u: any) => u !== data.username));
-            setPlayers((p: any) => [...p, data.username]);
-        }
-    });
-
-    socket.on('organize-tournament', (data: any) => {
-        console.log('organize-tournament', data)
-        setOrganization(data.organization);
-        setCurrentMenu('organizing');
-    });
-
-    socket.on('assign-game', (data: any) => {
-        console.log('assign-game', data)
-        handleJoinGame(data.gameCode);
-    })
+    const handleReady = () => {
+        socket.emit('ready');
+      };
 
 
     return (
         <div className="flex justify-center items-center w-screen h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-gray-900">
             
             {/* Create Game Menu */}
-            {
-                currentMenu === 'createGame' &&
+            {currentMenu === 'createGame' && (
                 <div className="relative z-10 flex flex-col items-center bg-gray-700 bg-opacity-60 backdrop-blur p-8 pb-4 rounded-lg shadow-lg transition-all">
-                    <p className="text-6xl sm:text-8xl font-semibold text-white mb-6 transition-transform">{createGameCode.toLocaleUpperCase()}</p>
+                    <p className="text-6xl sm:text-8xl font-semibold text-white mb-6 transition-transform">
+                        {createGameCode.toUpperCase()}
+                    </p>
                     <div className="flex space-x-4 mb-4">
                         <CopyToClipboard text={createGameCode} onCopy={() => { setCopied(true); setTimeout(() => setCopied(false), 2000); }}>
                             <Button type="primary" className="px-10 py-3 text-lg sm:px-12 sm:py-6 sm:text-2xl text-white">
@@ -99,23 +112,25 @@ function CreateTournament({ socket }: any) {
                         </Button>
                     </div>
                     <div className="w-full flex space-x-4 h-12 sm:h-14">
-                        <Input 
-                            value={inviteInput} 
+                        <Input
+                            value={inviteInput}
                             onChange={(e) => setInviteInput(e.target.value)}
-                            className="flex-1 w-4/5 h-full p-3 text-lg sm:text-2xl rounded-lg bg-gray-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                            placeholder="Enter username to invite" 
+                            className="flex-1 w-4/5 h-full p-3 text-lg sm:text-2xl rounded-lg bg-gray-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="Enter username to invite"
                         />
                         <Button onClick={handleInvite} type="primary" className="w-1/5 h-full text-lg sm:text-2xl text-white bg-blue-600 hover:bg-blue-500 rounded-lg">
                             Invite
                         </Button>
                     </div>
-                    {/* People Who Joined */}
+                    {/* Players Joined */}
                     <div className="w-72 sm:w-96 h-14 sm:h-24 mt-4">
-                        <p className="text-lg sm:text-2xl text-white">People Who Joined</p>
-                        <p className="text-sm sm:text-xl h-1/2 w-full overflow-auto text-gray-400">{players.length === 0 ? 'No Players' : players.join(', ')}</p>
+                        <p className="text-lg sm:text-2xl text-white">Players Joined</p>
+                        <p className="text-sm sm:text-xl h-1/2 w-full overflow-auto text-gray-400">
+                            {players.length === 0 ? 'No Players' : players.join(', ')}
+                        </p>
                     </div>
                 </div>
-            }
+            )}
 
             {/* Settings Menu */}
             {
@@ -138,7 +153,7 @@ function CreateTournament({ socket }: any) {
                         <InputNumber className="w-full sm:h-12 sm:text-2xl" min={2} max={10} defaultValue={playerCount} onChange={(value: number|null) => setPlayerCount(value ?? 0)} />
                     </div>
                     <div className="flex space-x-4">
-                        <Button onClick={handleCreateTournament} type="primary" className="px-6 py-3 text-lg sm:px-12 sm:py-6 sm:text-2xl">
+                        <Button onClick={startTournament} type="primary" className="px-6 py-3 text-lg sm:px-12 sm:py-6 sm:text-2xl">
                             Next
                         </Button>
                         <Button onClick={() => setCurrentMenu('default')} danger type="primary" className="px-6 py-3 text-lg sm:px-12 sm:py-6 sm:text-2xl">
@@ -192,6 +207,12 @@ function CreateTournament({ socket }: any) {
                 </div>
             }
 
+            {/* TournamentDisplay */}
+            {
+                currentMenu === 'tournamentDisplay' &&
+                <TournamentDisplay tree={tournamentOrder} handleReady={handleReady} />
+            }
+
             {/* Organizing */}
             {
                 currentMenu === 'organizing' &&
@@ -202,7 +223,7 @@ function CreateTournament({ socket }: any) {
 
             {/* Error Menu */}
             {
-                currentMenu !== 'createGame' && currentMenu !== 'settingMenu' && currentMenu !== 'default' && currentMenu !== 'waiting' && currentMenu !== 'organizing' &&
+                currentMenu !== 'createGame' && currentMenu !== 'settingMenu' && currentMenu !== 'default' && currentMenu !== 'waiting' && currentMenu !== 'organizing' && currentMenu !== 'tournamentDisplay' &&
                 <div className="relative z-10 bg-gray-700 bg-opacity-60 backdrop-blur p-8 rounded-lg shadow-lg flex flex-col items-center">
                     <p className="text-white text-lg">Something went wrong</p>
                 </div>

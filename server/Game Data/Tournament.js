@@ -5,6 +5,7 @@ export class Tournament {
         this.playerStatus = {}; // Track player statuses
         this.playerCount = playerCount;
         this.games = [];
+        this.round = 0;
         this.tournamentCode = tournamentCode;
         this.tournamentOrder = this.generateTournamentOrder();
 
@@ -18,13 +19,20 @@ export class Tournament {
         this.games.push(game);
     }
 
+    removeGame(game) {
+        const index = this.games.indexOf(game);
+        if (index > -1) {
+            this.games.splice(index, 1);
+        }
+    }
+
     generateTournamentOrder() {
         let arr = [this.players];
         let result = [arr[0]]; // Start with the original array
-        let subArray = arr[0].slice(1).map(Number); // Remove 'Main' and convert remaining to numbers
+        let subArray = [...arr[0].slice(0, -1*Math.floor(arr[0].length/4)).keys()].map(n => n + 1); // Remove 'Main' and convert remaining to numbers
 
         while (subArray.length - 1 > 1) {
-            subArray = subArray.slice(0, -1); // Remove the last element in each iteration
+            subArray = subArray.slice(0, -1*Math.floor(subArray.length / 2)); // Remove the last element in each iteration
             result.push([...subArray]); // Push a copy of the current subArray
         }
 
@@ -41,12 +49,29 @@ export class Tournament {
         this.organizer = player;
     }
 
+    getPlayerPosition(player) {
+        return {
+            column: this.tournamentOrder.findIndex((u) => u.includes(player)),
+            row: this.tournamentOrder[this.tournamentOrder.findIndex((u) => u.includes(player))].indexOf(player)
+        };
+    }
+
+    getPlayerByPosition(column, row) {
+        return this.tournamentOrder[column][row];
+    }
+
     getTournamentOrder() {
         //generate dictionary
-        return this.tournamentOrder.map(u => u.map(i => ({
-            player: i,
-            status: this.playerStatus[i]
-        })
+        return this.tournamentOrder.map((u, layerIndex) => u.map(i => (i === Number(i) ?
+            {
+                player: i,
+                status: this.getPlayerStatus( this.tournamentOrder[layerIndex-1][ ( (i-1)*2 ) + 1 ] ) === 'ready' &&
+                this.getPlayerStatus( this.tournamentOrder[layerIndex-1][ ( (i-1)*2 ) ] ) === 'ready' ? 'ready' : 'currentlyPlaying'
+            } :
+            {
+                player: i,
+                status: this.playerStatus[i]
+            })
         ));
     }
 
@@ -76,5 +101,9 @@ export class Tournament {
 
     putInFinishedPlayers(player) {
         this.updatePlayerStatus(player, "finished");
+    }
+
+    putInReady(player) {
+        this.updatePlayerStatus(player, "ready");
     }
 }
