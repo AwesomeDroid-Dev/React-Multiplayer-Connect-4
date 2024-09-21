@@ -5,7 +5,6 @@ import { Server } from 'socket.io';
 import cors from 'cors';
 import { Game } from './Game Data/Game.js';
 import { Tournament } from './Game Data/Tournament.js';
-import { isString } from 'util';
 
 app.use(cors())
 
@@ -19,7 +18,7 @@ const io = new Server(server, {
 })
 
 let games = {}
-let tournaments = {'sj2ndk':{games: [], players: [], spectators: [], currentlyPlaying: [], playerCount: 0}}
+let tournaments = {}
 let users = {}
 
 io.on('connection', (socket) => {
@@ -103,9 +102,11 @@ io.on('connection', (socket) => {
 
     socket.on('next-round', () => {
         if (typeof tournaments[tournamentCode] === 'undefined') return;
+        const tournament = tournaments[tournamentCode]
 
         socket.join(tournamentCode)
-        socket.emit('next-round', { tournamentOrder: tournaments[tournamentCode].getTournamentOrder() });
+        socket.emit('next-round', { tournamentOrder: tournament.getTournamentOrder() });
+        io.to(tournamentCode).emit('update-order', { tournamentOrder: tournament.getTournamentOrder() });
     })
 
     socket.on('join-tournament', ({ tournament }) => {
@@ -138,6 +139,9 @@ io.on('connection', (socket) => {
     socket.on('ready', () => {
         const tournament = tournaments[tournamentCode];
         if (!tournament) return;
+        if (!tournament.players.includes(username)) return;
+        if (tournament.playerStatus[username] === 'spectating') return;
+        if (tournament.tournamentOrder.findIndex((u) => u.includes(player))) return;
     
         // Mark the player as ready
         tournament.putInReady(username);
@@ -246,22 +250,33 @@ function gameWin(gameCode, win) {
     games[gameCode].winner = win
     io.to(gameCode).emit('win', games[gameCode].winner)
 
+    let tournament = tournaments[games[gameCode].tournament]
+
     if (!games[gameCode].tournament) return;
     if (win !== '') {
-        tournaments[games[gameCode].tournament].putInFinishedPlayers(games[gameCode].players[win])
-        tournaments[games[gameCode].tournament].putInSpectating(games[gameCode].players[win])
+        let winner = games[gameCode].players[win]
+        let loser = games[gameCode].players[win === 'X' ? 'O' : 'X']
+
+        tournament.setWinner(winner, loser)
     } else {
-        tournaments[games[gameCode].tournament].putInFinishedPlayers(games[gameCode].players[win])
-        tournaments[games[gameCode].tournament].putInFinishedPlayers(games[gameCode].players[win])
+        //Tie (Still not working)
+        console.warn('Tie Still not working')
+        tournament.putInFinishedPlayers(games[gameCode].players[win])
+        tournament.putInFinishedPlayers(games[gameCode].players[win])
     }
+
+    tournaments[games[gameCode].tournament] = tournament;
 }
 
 function startTournament(tournamentCode) {
     const tournament = tournaments[tournamentCode]
 
     for (let i = 0; i < tournament.playerCount; i += 2) {
-        if (i === tournament.playerCount + 1) {
+        if (i === tournament.playerCount - 1) {
             tournaments[tournamentCode].putInFinishedPlayers(tournament.players[i])
+
+            tournaments[tournamentCode].setWinner(tournament.players[i])
+            io.to(users[ tournament.players[i] ]).emit('next-round', { tournamentOrder: tournaments[tournamentCode].getTournamentOrder() });
             break
         }
         const gameCode = genCode();
@@ -278,7 +293,4 @@ function startTournament(tournamentCode) {
         tournaments[tournamentCode].putInCurrentlyPlaying(tournament.players[i])
         tournaments[tournamentCode].putInCurrentlyPlaying(tournament.players[i+1])
     }
-}
-
-function createTournamentGame(code, player1, player2, tournamentCode) {
 }

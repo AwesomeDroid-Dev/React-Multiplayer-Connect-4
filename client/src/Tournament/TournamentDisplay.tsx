@@ -18,7 +18,13 @@ function TournamentDisplay({ tree, handleReady }: TournamentDisplayProps): JSX.E
               {layer.map((player: any, playerIndex: number) => (
                 <Fragment key={playerIndex}>
                   <div
-                    className={`p-1 ${player.status === 'ready' ? 'bg-green-600' : 'bg-gray-600'}`}
+                    className={`p-1`}
+                    style={{ backgroundColor: `${
+                        player.status === 'ready' ? 'cyan' :
+                        player.status === 'winner' ? 'green' :
+                        player.status === 'loser' ? 'red' :
+                        player.status === 'spectating' ? 'purple' :
+                        'gray'}` }}
                   >
                     <div className="text-white bg-gray-900 p-1 text-center min-w-[100px]">
                       {typeof player.player === 'number' ? `Winner ${player.player}` : player.player}
