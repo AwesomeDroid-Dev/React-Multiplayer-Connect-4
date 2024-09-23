@@ -26,6 +26,11 @@ cd server
 npm install
 npm start
 ```
+
+# Todo
+1. Add a proper waiting room
+2. Fix up the tournament win screen
+
 ## Images
 
 ![Screenshot 2024-09-07 105149](https://github.com/user-attachments/assets/47e104d5-c919-4b09-b912-3e20dad04fbd)

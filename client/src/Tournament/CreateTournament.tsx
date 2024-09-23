@@ -6,7 +6,7 @@ import TournamentDisplay from "./TournamentDisplay";
 
 function CreateTournament({ socket, currentMenu, setCurrentMenu, tournamentOrder, setTournamentOrder }: any) {
     const [createGameCode, setCreateGameCode] = useState('Loading...');
-    const [betweenGame, setBetweenGame] = useState('keep');
+    const [betweenGame, setBetweenGame] = useState('random');
     const [textInputCode, setTextInputCode] = useState('');
     const [inviteInput, setInviteInput] = useState('');
     const [invites, setInvites] = useState<any[]>([]);
@@ -25,11 +25,13 @@ function CreateTournament({ socket, currentMenu, setCurrentMenu, tournamentOrder
 
         const handleCreateTournament = (data: any) => {
             setCreateGameCode(data.tournamentCode);
+            setCurrentMenu('waiting');
         };
 
         const handleJoinTournament = (data: any) => {
             if (data.status === 'success') {
                 setPlayers((prev) => [...prev.filter((p) => p !== data.username), data.username]);
+                setCurrentMenu('waiting');
             }
         };
 
@@ -68,7 +70,7 @@ function CreateTournament({ socket, currentMenu, setCurrentMenu, tournamentOrder
     const startTournament = () => {
         setCurrentMenu('createGame');
         setCreateGameCode('Loading...');
-        socket.emit('create-tournament', { playerCount });
+        socket.emit('create-tournament', { playerCount, betweenGame });
     };
 
     const handleJoinTournament = (gameCode: string | undefined) => {
@@ -142,9 +144,10 @@ function CreateTournament({ socket, currentMenu, setCurrentMenu, tournamentOrder
                         <Select className="w-full sm:h-12" 
                             defaultValue={betweenGame} 
                             onChange={(value: string) => setBetweenGame(value)} 
-                            disabled
                             options={[
-                                {value: 'keep', label: <p className="sm:text-2xl">Random Beginner</p>},
+                                {value: 'random', label: <p className="sm:text-2xl">Random Beginner</p>},
+                                {value: 'left-to-right', label: <p className="sm:text-2xl">Left to Right</p>},
+                                {value: 'right-to-left', label: <p className="sm:text-2xl">Right to Left</p>},
                             ]}
                         />
                     </div>
@@ -201,11 +204,75 @@ function CreateTournament({ socket, currentMenu, setCurrentMenu, tournamentOrder
 
             {/* Waiting Menu */}
             {
-                currentMenu === 'waiting' &&
-                <div className="relative z-10 bg-gray-700 bg-opacity-60 backdrop-blur p-8 rounded-lg shadow-lg flex flex-col items-center">
-                    <p className="text-white text-lg">Waiting for other players</p>
-                </div>
+                currentMenu === 'waiting' && (
+                    <div className="relative z-10 flex flex-col items-center justify-center bg-gray-800 bg-opacity-70 backdrop-blur-lg p-8 rounded-lg shadow-lg w-full max-w-md mx-auto">
+                        <h1 className="text-4xl sm:text-6xl font-bold text-white mb-6">Waiting for Players...</h1>
+
+                        {/* Players Joined */}
+                        <div className="w-full h-48 sm:h-64 bg-gray-700 rounded-lg p-4 overflow-auto mb-6">
+                            <p className="text-lg sm:text-2xl text-white mb-2">Players Joined</p>
+                            <ul className="text-white text-base sm:text-lg space-y-2">
+                                {players.length === 0 ? (
+                                    <p className="text-gray-400">No Players Yet</p>
+                                ) : (
+                                    players.map((player, index) => (
+                                        <li key={index} className="flex justify-between items-center">
+                                            <span>{player}</span>
+                                            <span className="text-green-400">{player === 'You' ? 'Ready' : 'Waiting'}</span>
+                                        </li>
+                                    ))
+                                )}
+                            </ul>
+                        </div>
+
+                        {
+                        createGameCode !== 'Loading...' && 
+                            <>
+                            <div className="w-full flex space-x-4 mb-6 h-12 sm:h-14">
+                                <Input
+                                    value={inviteInput}
+                                    onChange={(e) => setInviteInput(e.target.value)}
+                                    className="flex-1 p-3 text-lg sm:text-xl rounded-lg bg-gray-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="Invite username"
+                                />
+                                <Button onClick={handleInvite} type="primary" className="w-1/4 h-full text-lg sm:text-xl text-white bg-blue-600 hover:bg-blue-500 rounded-lg">
+                                    Invite
+                                </Button>
+                            </div>
+                            {/* Tournament Code Section */}
+                            <div className="w-full flex space-x-4 -mt-2 mb-6 h-10 sm:h-12">
+                                <p className="flex-1 p-3 text-lg sm:text-xl rounded-lg bg-gray-600 text-white">{createGameCode}</p>
+                                <CopyToClipboard text={createGameCode} onCopy={() => { setCopied(true); setTimeout(() => setCopied(false), 2000); }}>
+                                    <Button type="primary" className="w-2/6 h-full text-lg sm:text-xl text-white bg-blue-600 hover:bg-blue-500 rounded-lg">
+                                        {copied ? 'Copied!' : 'Copy Code'}
+                                    </Button>
+                                </CopyToClipboard>
+                                <CopyToClipboard text={`http://localhost:5173/tournament-game?gameCode=${createGameCode}`} onCopy={() => { setCopied(true); setTimeout(() => setCopied(false), 2000); }}>
+                                    <Button type="primary" className="w-2/6 h-full text-lg sm:text-xl text-white bg-blue-600 hover:bg-blue-500 rounded-lg">
+                                        {copied ? 'Copied!' : 'Copy Link'}
+                                    </Button>
+                                </CopyToClipboard>
+                            </div>
+                            </>
+                        }
+
+                        {/* Actions */}
+                        <div className="w-full flex justify-between items-center">
+                            {/* Only the creator should see this */}
+                            {players.length >= playerCount && players[0] === 'You' && (
+                                <Button onClick={() => socket.emit('start-tournament')} type="primary" className="px-6 py-3 text-lg sm:text-2xl text-white bg-green-600 hover:bg-green-500">
+                                    Start Tournament
+                                </Button>
+                            )}
+                            {/* Cancel/Leave Button for everyone */}
+                            <Button onClick={() => setCurrentMenu('default')} danger type="primary" className="px-6 py-3 text-lg sm:text-2xl text-white">
+                                Leave
+                            </Button>
+                        </div>
+                    </div>
+                )
             }
+
 
             {/* TournamentDisplay */}
             {

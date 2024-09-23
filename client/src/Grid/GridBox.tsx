@@ -37,7 +37,7 @@ function GridBox(props: { handleClick: (arg0: any) => void; index: number; text:
           transitionDuration: `${animate ? '0s' : `${300+(Math.floor(props.index/7)*50)}ms`}`,
         }}
       >
-            {text === 'X' ? <ConnectCoin color='red' size={props.gridSize/20} transform='0.1rem' responsive={false} /> : text === 'O' ? <ConnectCoin color='blue' size={props.gridSize/20} transform='0.1rem' responsive={false} /> : ''}
+            {text === 'X' ? <ConnectCoin color='red' size={props.gridSize/35} transform='0.1rem' responsive={false} /> : text === 'O' ? <ConnectCoin color='blue' size={props.gridSize/35} transform='0.1rem' responsive={false} /> : ''}
         </div>
         :
         <div 

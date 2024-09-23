@@ -1,11 +1,12 @@
 export class Tournament {
-    constructor(players, playerCount, tournamentCode) {
+    constructor(players, playerCount, tournamentCode, betweenGame) {
         this.players = players;
         this.organizer = players[0];
         this.playerStatus = {}; // Track player statuses
         this.playerCount = playerCount;
         this.games = [];
         this.round = 0;
+        this.betweenGame = betweenGame;
         this.tournamentCode = tournamentCode;
         this.tournamentOrder = this.generateTournamentOrder();
 
@@ -41,6 +42,11 @@ export class Tournament {
         const row = this.tournamentOrder[winnerPos.column+1].indexOf(winnerPos.row/2+1)
 
         this.tournamentOrder[winnerPos.column+1][row] = winner
+
+        if (this.tournamentOrder[winnerPos.column+1][0] === 'Winner') {
+            this.tournamentOrder[winnerPos.column+1][0] = winner+' Winner'
+            return;
+        }
         
         if (typeof this.tournamentOrder[winnerPos.column+1][row+1] === 'undefined' && row % 2 === 0) {
             this.setWinner(winner)

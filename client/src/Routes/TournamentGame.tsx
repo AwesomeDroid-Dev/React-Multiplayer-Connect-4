@@ -47,6 +47,14 @@ function TournamentGame() {
         localStorage.setItem('username', username);
         localStorage.setItem('loggedIn', 'true');
         setShowLogin(true);
+
+        const url = new URL(window.location.href);
+        const gameCode = url.searchParams.get('gameCode');
+        if (gameCode) {
+          socket.emit('join-tournament', { tournament: gameCode });
+          window.history.pushState("object or string", "Title", "/tournament-game");
+        }
+
       } else {
         setUsername('');
         setShowLogin(false);

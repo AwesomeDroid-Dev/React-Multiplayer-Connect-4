@@ -11,7 +11,7 @@ function TournamentDisplay({ tree, handleReady }: TournamentDisplayProps): JSX.E
   return (
     <div className="flex justify-center items-center w-screen h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-gray-900">
       <div className="relative z-10 bg-gray-700 bg-opacity-60 backdrop-blur p-8 rounded-lg shadow-lg flex flex-col items-center">
-        <h1 className="text-3xl font-bold text-center text-white pb-5">Organize Tournament</h1>
+        <h1 className="text-3xl font-bold text-center text-white pb-5">Tournament</h1>
         <div className="flex flex-col-reverse gap-2 items-center">
           {tree.map((layer: any, layerIndex: number) => (
             <div key={layerIndex} className="flex flex-row" style={{ gap: `${layerIndex * 2}rem` }}>

@@ -5,7 +5,7 @@ function ConnectCoin({ color, size, responsive, cx, cy, sx, sy, transform, strok
   let scale = 3
 
   useEffect(() => {
-    setObjectSize( ( responsive ? document.documentElement.clientWidth : 1 )*size)
+    setObjectSize( ( responsive ? document.documentElement.clientWidth*1 : 1 )*size)
   }, [size, document.documentElement.clientWidth])
 
   return (

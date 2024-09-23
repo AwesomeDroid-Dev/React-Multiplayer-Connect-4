@@ -44,7 +44,7 @@ io.on('connection', (socket) => {
             return
         }
 
-        if (typeof users[data.username] !== 'undefined' && users[data.username] !== socket.id) {
+        if (typeof users[data.username] !== 'undefined' && users[data.username] !== socket.id || data.username === 'Winner') {
             socket.emit('login', {status: 'error', message: 'Username already taken'});
             return
         };
@@ -90,10 +90,10 @@ io.on('connection', (socket) => {
         io.to(gameCode).emit('turn', games[gameCode].turn)
     });
 
-    socket.on('create-tournament', ({ playerCount }) => {
+    socket.on('create-tournament', ({ playerCount, betweenGame }) => {
         handleDisconnect(socket.id, gameCode)
         tournamentCode = genCode();
-        tournaments[tournamentCode] = new Tournament([], playerCount, tournamentCode)
+        tournaments[tournamentCode] = new Tournament([], playerCount, tournamentCode, betweenGame)
         tournaments[tournamentCode].addPlayer(username)
         tournaments[tournamentCode].setOrganizer(username)
         socket.join(tournamentCode)
@@ -110,6 +110,7 @@ io.on('connection', (socket) => {
     })
 
     socket.on('join-tournament', ({ tournament }) => {
+        console.log(tournament)
         if (typeof tournaments[tournament] === 'undefined') return;
         if (tournaments[tournament].players.length > tournaments[tournament].playerCount) {
             socket.emit('join-tournament', { status: 'error', message: 'Tournament is full' });
@@ -141,13 +142,10 @@ io.on('connection', (socket) => {
         if (!tournament) return;
         if (!tournament.players.includes(username)) return;
         if (tournament.playerStatus[username] === 'spectating') return;
-        if (tournament.tournamentOrder.findIndex((u) => u.includes(player))) return;
+        if (typeof tournament.tournamentOrder.findIndex((u) => u.includes(username)) === 'undefined') return;
     
         // Mark the player as ready
         tournament.putInReady(username);
-    
-        // Broadcast updated tournament order to all players
-        io.to(tournamentCode).emit('update-order', { tournamentOrder: tournament.getTournamentOrder() });
     
         // Get the player's position in the tournament
         const playerPosition = tournament.getPlayerPosition(username);
@@ -165,7 +163,13 @@ io.on('connection', (socket) => {
             gameCode = genCode();
     
             // Determine player1 and player2 based on the player's position
-            const [player1, player2] = diff === 1 ? [username, opponent] : [opponent, username];
+            let [player1, player2] = diff === 1 ? [username, opponent] : [opponent, username];
+
+            [player1, player2] = tournament.betweenGame === 'random' ?
+                [player1, player2].sort(() => Math.random() - 0.5) :
+                tournament.betweenGame === 'left-to-right' ?
+                [player, player2] :
+                [player2, player];
     
             // Create a new game
             games[gameCode] = new Game('keep', 'X', tournamentCode, player1);
@@ -183,10 +187,11 @@ io.on('connection', (socket) => {
             tournament.putInCurrentlyPlaying(player2);
         }
 
+        // Broadcast updated tournament order to all players
+        io.to(tournamentCode).emit('update-order', { tournamentOrder: tournament.getTournamentOrder() });
+
         //update to the real tournaments
         tournaments[tournamentCode] = tournament
-
-        console.log(tournament.playerStatus)
     });
 
     socket.on('play', (data) => {
@@ -280,17 +285,25 @@ function startTournament(tournamentCode) {
             break
         }
         const gameCode = genCode();
+        const [player1, player2] = tournament.betweenGame === 'random' ?
+            [tournament.players[i], tournament.players[i+1]].sort(() => Math.random() - 0.5) :
+            tournament.betweenGame === 'left-to-right' ?
+            [tournament.players[i], tournament.players[i+1]] :
+            [tournament.players[i+1], tournament.players[i]];
+        
+        console.log([player1, player2])
+        
         games[gameCode] = new Game(
             'keep', 
             'X', 
             tournamentCode, 
-            tournament.players[i]
+            player1
         );
         games[gameCode].begin = games[gameCode].turn
         tournaments[tournamentCode].addGame(gameCode)
-        io.to(users[ tournament.players[i] ]).emit('assign-game', {gameCode})
-        io.to(users[ tournament.players[i+1] ]).emit('assign-game', {gameCode})
-        tournaments[tournamentCode].putInCurrentlyPlaying(tournament.players[i])
-        tournaments[tournamentCode].putInCurrentlyPlaying(tournament.players[i+1])
+        io.to(users[ player1 ]).emit('assign-game', {gameCode})
+        io.to(users[ player2 ]).emit('assign-game', {gameCode})
+        tournaments[tournamentCode].putInCurrentlyPlaying(player1)
+        tournaments[tournamentCode].putInCurrentlyPlaying(player2)
     }
 }
