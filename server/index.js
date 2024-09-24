@@ -1,5 +1,6 @@
 import express from 'express';
 const app = express();
+import 'dotenv/config'
 import http from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
@@ -12,7 +13,7 @@ const server = http.createServer(app)
 
 const io = new Server(server, {
     cors: {
-        origin: 'http://localhost:5173',
+        origin: process.env.CLIENT_URL,
         methods: ['GET', 'POST']
     }
 })
@@ -233,7 +234,7 @@ io.on('connection', (socket) => {
     })
 })
 
-server.listen(5009, () => {
+server.listen(Number(process.env.PORT), () => {
     console.log('Server is running')
 })
 

@@ -1,6 +1,8 @@
 import io from "socket.io-client"
 
-const socket = io('http://localhost:5009')
+console.log("Server URL:", import.meta.env.VITE_SERVER_URL);
+
+const socket = io(import.meta.env.VITE_SERVER_URL || 'http://localhost:3001')
 socket.connect();
 
 export default socket
