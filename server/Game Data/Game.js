@@ -1,49 +1,6 @@
 export class Game {
     constructor(turnSwitching, begin, tournament, username) {
-        this.game = [
-            "O",
-            "",
-            "O",
-            "O",
-            "O",
-            "X",
-            "O",
-            "X",
-            "O",
-            "X",
-            "X",
-            "X",
-            "O",
-            "X",
-            "O",
-            "X",
-            "O",
-            "O",
-            "O",
-            "X",
-            "O",
-            "X",
-            "O",
-            "X",
-            "X",
-            "X",
-            "O",
-            "X",
-            "O",
-            "X",
-            "O",
-            "O",
-            "X",
-            "X",
-            "O",
-            "X",
-            "O",
-            "X",
-            "X",
-            "O",
-            "O",
-            "X"
-          ] //new Array(42).fill('');
+        this.game = new Array(42).fill('');
         this.turn = 'X';
         this.latestChange = -1;
         this.winner = 'none';
