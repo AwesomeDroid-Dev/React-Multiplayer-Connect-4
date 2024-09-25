@@ -1,6 +1,49 @@
 export class Game {
     constructor(turnSwitching, begin, tournament, username) {
-        this.game = new Array(42).fill('');
+        this.game = [
+            "O",
+            "",
+            "O",
+            "O",
+            "O",
+            "X",
+            "O",
+            "X",
+            "O",
+            "X",
+            "X",
+            "X",
+            "O",
+            "X",
+            "O",
+            "X",
+            "O",
+            "O",
+            "O",
+            "X",
+            "O",
+            "X",
+            "O",
+            "X",
+            "X",
+            "X",
+            "O",
+            "X",
+            "O",
+            "X",
+            "O",
+            "O",
+            "X",
+            "X",
+            "O",
+            "X",
+            "O",
+            "X",
+            "X",
+            "O",
+            "O",
+            "X"
+          ] //new Array(42).fill('');
         this.turn = 'X';
         this.latestChange = -1;
         this.winner = 'none';
@@ -16,7 +59,7 @@ export class Game {
     }
 
     win(index) {
-        if (!this.game.includes('')) return ''
+        if (!this.game.includes('')) return 'tie'
 
         const directions = [
             { colDir: 1, rowDir: 0 },  // Horizontal

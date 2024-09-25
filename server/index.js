@@ -64,6 +64,7 @@ io.on('connection', (socket) => {
 
     socket.on('create-game', (data) => {
         handleDisconnect(socket.id, gameCode)
+        socket.leave(gameCode)
         gameCode = genCode();
         games[gameCode] = new Game(
             data.turnSwitching,
@@ -78,6 +79,7 @@ io.on('connection', (socket) => {
 
     socket.on('join-game', (data) => {
         if (typeof games[data.gameCode] === 'undefined') return;
+        socket.leave(gameCode)
         gameCode = data.gameCode
         const feedback = games[gameCode].joinPlayer(username)
         if (feedback.status === 'error') {
@@ -93,6 +95,7 @@ io.on('connection', (socket) => {
 
     socket.on('create-tournament', ({ playerCount, betweenGame }) => {
         handleDisconnect(socket.id, gameCode)
+        socket.leave(tournamentCode)
         tournamentCode = genCode();
         tournaments[tournamentCode] = new Tournament([], playerCount, tournamentCode, betweenGame)
         tournaments[tournamentCode].addPlayer(username)
@@ -105,7 +108,6 @@ io.on('connection', (socket) => {
         if (typeof tournaments[tournamentCode] === 'undefined') return;
         const tournament = tournaments[tournamentCode]
 
-        socket.join(tournamentCode)
         socket.emit('next-round', { tournamentOrder: tournament.getTournamentOrder() });
         io.to(tournamentCode).emit('update-order', { tournamentOrder: tournament.getTournamentOrder() });
     })
@@ -117,12 +119,13 @@ io.on('connection', (socket) => {
             socket.emit('join-tournament', { status: 'error', message: 'Tournament is full' });
             return
         }
-        if (tournaments[tournament].players.includes(username)) {
-            socket.emit('join-tournament', { status: 'error', message: 'You are already in the tournament' });
-            return
-        }
+        socket.leave(tournamentCode)
         tournamentCode = tournament
         socket.join(tournamentCode)
+        if (tournaments[tournament].players.includes(username)) {
+            io.to(tournamentCode).emit('join-tournament', { status: 'success', username });
+            return
+        }
         tournaments[tournamentCode].addPlayer(username)
         io.to(tournamentCode).emit('join-tournament', { status: 'success', username });
 
@@ -219,11 +222,12 @@ io.on('connection', (socket) => {
 
     socket.on('accept-rematch', (data) => {
         if (typeof games[data.gameCode] === 'undefined') return;
-        gameCode = data.gameCode
         const status = games[gameCode].joinPlayer(username)
         if (status.status === 'error') {
             return status
         }
+        socket.leave(gameCode)
+        gameCode = data.gameCode
         socket.join(gameCode)
 
         io.to(gameCode).emit('start-game', {gameCode, players: {...games[gameCode].players}})
@@ -254,19 +258,18 @@ function handleDisconnect(socketId, gameCode) {
 
 function gameWin(gameCode, win) {
     games[gameCode].winner = win
-    io.to(gameCode).emit('win', games[gameCode].winner)
+    io.to(gameCode).emit('win', win === 'tie' ? '' : win)
 
     let tournament = tournaments[games[gameCode].tournament]
 
     if (!games[gameCode].tournament) return;
-    if (win !== '') {
+    if (win !== 'tie') {
         let winner = games[gameCode].players[win]
         let loser = games[gameCode].players[win === 'X' ? 'O' : 'X']
 
         tournament.setWinner(winner, loser)
     } else {
         //Tie (Still not working)
-        console.warn('Tie Still not working')
         tournament.putInFinishedPlayers(games[gameCode].players[win])
         tournament.putInFinishedPlayers(games[gameCode].players[win])
     }
