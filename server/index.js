@@ -123,11 +123,11 @@ io.on('connection', (socket) => {
         tournamentCode = tournament
         socket.join(tournamentCode)
         if (tournaments[tournament].players.includes(username)) {
-            io.to(tournamentCode).emit('join-tournament', { status: 'success', username });
+            io.to(tournamentCode).emit('join-tournament', { status: 'success', player: tournaments[tournamentCode].players });
             return
         }
         tournaments[tournamentCode].addPlayer(username)
-        io.to(tournamentCode).emit('join-tournament', { status: 'success', username });
+        io.to(tournamentCode).emit('join-tournament', { status: 'success', player: tournaments[tournamentCode].players });
 
         if (tournaments[tournamentCode].players.length === tournaments[tournamentCode].playerCount) {
             io.to( users[tournaments[tournamentCode].organizer] ).emit('organize-tournament', { organization: tournaments[tournamentCode].tournamentOrder.map(u => u.map(i => String(i) === i ? i : `Winner ${i}`)) });

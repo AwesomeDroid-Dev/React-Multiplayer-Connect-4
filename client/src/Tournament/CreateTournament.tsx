@@ -30,7 +30,7 @@ function CreateTournament({ socket, currentMenu, setCurrentMenu, tournamentOrder
 
         const handleJoinTournament = (data: any) => {
             if (data.status === 'success') {
-                setPlayers((prev) => [...prev.filter((p) => p !== data.username), data.username]);
+                setPlayers(data.players);
                 setCurrentMenu('waiting');
             }
         };
